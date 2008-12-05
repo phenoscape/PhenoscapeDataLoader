@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     ant build file
+     ====================================================================== -->
+<project name="Phenoscape data loader" default="compile" basedir=".">
+	<description>Phenoscape data loader ant build</description>
+	<property name="src" value="src"/>
+	<property name="test" value="test"/>
+	<property name="classfiles" value="bin"/>
+	<property name="lib" value="lib"/>
+	<property name="jarfile" value="phenoscapedataloader.jar"/>
+	<tstamp>
+		<format property="NOW" pattern="yyyy-MM-dd_HH:mm:ss"/>
+	</tstamp>
+	<property name="project.version" value="1.0.3"/>
+	<property name="project.build" value="${NOW}"/>
+	<property name="java-minimum" value="1.5"/>
+	
+<!-- The init target makes sure that the prerequisite directories exist. -->
+	<target name="init">
+		<mkdir dir="${classfiles}"/>
+	</target>
+	
+	<path id="project.classpath">
+		<fileset dir="${lib}">
+			<include name="*"/>
+		</fileset>
+	</path>
+	
+<!-- The compile target runs javac on all the java files, and saves them into  the classfiles directory  -->
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${classfiles}" debug="yes" source="${java-minimum}" target="${java-minimum}">
+			<classpath refid="project.classpath"/>
+		</javac>
+	</target>
+	
+    <target name="build-test" depends="compile">
+        <javac srcdir="${test}" destdir="${classfiles}" debug="yes" source="${java-minimum}" target="${java-minimum}">
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
+	
+<!-- terse FAIL or PASS -->
+	<target name="test" depends="build-test" description="Unit tests">
+		<junit fork="yes" printsummary="on" maxmemory="1024m">
+			<classpath>
+				<pathelement path="."/>
+				<pathelement path="${classfiles}"/>
+				<pathelement path="${src}"/> <!-- need to include src folder to find resource files such as filters -->
+				<fileset dir="${lib}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+			<batchtest>
+				<fileset dir="${test}"/>
+			</batchtest>
+		</junit>
+	</target>
+	
+<!-- prints to stdout all messages -->
+	<target name="verbose-test" depends="build-test" description="Unit tests">
+		<junit fork="yes" printsummary="withOutAndErr" maxmemory="1024m">
+			<classpath>
+				<pathelement path="."/>
+				<pathelement path="${classfiles}"/>
+				<pathelement path="${src}"/> <!-- need to include src folder to find resource files such as filters -->
+				<fileset dir="${lib}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+			<batchtest>
+				<fileset dir="${test}"/>
+			</batchtest>
+		</junit>
+	</target>
+	
+<!-- set var junit.test.class.name from cmd line for example: ant runatest -Djunit.test.class.name="org.phenoscape.io.NEXUSReaderTest"-->
+	<target name="runatest" depends="build-test">
+		<junit fork="yes" printsummary="withOutAndErr" maxmemory="1024m" showoutput="true">
+			<classpath>
+				<pathelement path="."/>
+				<pathelement path="${classfiles}"/>
+				<fileset dir="${lib}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+			<test name="${junit.test.class.name}"/>
+		</junit>
+	</target>
+	
+<!-- The clean target just erases the classes -->
+	<target name="clean">
+		<delete dir="${classfiles}"/>
+	</target>
+	
+<!-- clean and compile everything -->
+	<target name="build-all" depends="clean,compile,build-test"/>
+	
+	<target name="jar" depends="compile">
+		<jar destfile="${jarfile}">
+			<fileset dir="${classfiles}"/>
+			<fileset dir="${src}" includes="org/phenoscape/filters/"/>
+			<fileset dir="${src}" includes="org/phenoscape/view/layouts/"/>
+			<fileset dir="${src}" includes="org/phenoscape/view/images/"/>
+			<fileset file="log4j.xml"/>
+			<manifest>
+				<attribute name="project.version" value="${project.version}"/>
+				<attribute name="project.build" value="${project.build}"/>
+			</manifest>
+		</jar>
+	</target>
+	
+</project>
