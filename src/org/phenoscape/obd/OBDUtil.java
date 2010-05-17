@@ -39,7 +39,6 @@ public class OBDUtil {
         final Node n = new Node(id);
         n.setMetatype(Metatype.CLASS);  //why is this CLASS? should it be INSTANCE??
         n.addStatement(new LinkStatement(id, vocab.instance_of(), typeID));
-        //graph.addNode(n);
         return n;
     }
     

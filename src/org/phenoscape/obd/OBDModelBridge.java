@@ -48,7 +48,6 @@ public class OBDModelBridge {
     public static final String STATE_TYPE_ID = "cdao:CharacterStateDomain";
     public static final String CELL_TYPE_ID = "cdao:CharacterStateDatum";
     public static final String CHARACTER_TYPE_ID = "cdao:Character";
-    public static final String PUBLICATION_TYPE_ID = "PHENOSCAPE:Publication"; 
     public static final String OTU_TYPE_ID = "cdao:TU";
     public static final String SPECIMEN_TYPE_ID = "PHENOSCAPE:Specimen";
     public static final String HAS_PUB_REL_ID = "PHENOSCAPE:has_publication";
@@ -70,7 +69,6 @@ public class OBDModelBridge {
     public static final String HAS_MSRMNT_REL_ID = "PHENOSCAPE:has_measurement";
     public static final String HAS_UNIT_REL_ID = "PHENOSCAPE:has_unit";
     public static final String HAS_PUBLICATION_NAME = "PHENOSCAPE:has_publication_name";
-
     private static final RelationVocabulary relationVocabulary = new RelationVocabulary();
     private Map<Character, String> characterIdMap;
     private Map<State, String> stateIdMap;
@@ -97,7 +95,7 @@ public class OBDModelBridge {
         // Dataset metadata
         this.graph.addNode(OBDUtil.createInstanceNode(dsId, DATASET_TYPE_ID));
         final String curators = ds.getCurators();
-        final Node pubNode = OBDUtil.createInstanceNode(ds.getPublication(), PUBLICATION_TYPE_ID);
+        final Node pubNode = OBDUtil.createInstanceNode(ds.getPublication(), Vocab.PUBLICATION_TYPE_ID);
         this.graph.addNode(pubNode);
         LinkStatement ds2p = new LinkStatement(dsId, HAS_PUB_REL_ID, pubNode.getId());
         graph.addStatement(ds2p);

@@ -87,5 +87,6 @@
 	<classpathentry kind="lib" path="lib/xsdlib-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/xsdlib.jar"/>
 	<classpathentry kind="lib" path="lib/phenex.jar"/>
+	<classpathentry kind="lib" path="lib/jdom.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
