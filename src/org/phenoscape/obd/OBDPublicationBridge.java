@@ -3,6 +3,7 @@ package org.phenoscape.obd;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -20,7 +21,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class OBDPublicationBridge {
-    
+
     public Graph translate(Document endnoteXML) {
         final Graph graph = new Graph();
         final org.jdom.Document endnoteDoc = new DOMBuilder().build(endnoteXML);
@@ -32,7 +33,7 @@ public class OBDPublicationBridge {
         }
         return graph;
     }
-    
+
     public Graph translateRecord(Element record) {
         final Graph pubGraph = new Graph();
         final Element accessionNumElement = record.getChild("accession-num");
@@ -72,7 +73,7 @@ public class OBDPublicationBridge {
                 final String abstractText = abstractElement.getValue().trim(); //TODO handle italics properly
                 pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_ABSTRACT, abstractText);
             }
-            //TODO generate and link full citation
+            pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_CITATION, this.createFullCitation(authors, year, title));
             log().debug("Adding pub: " + pubNode);
             pubGraph.addNode(pubNode);
         } else {
@@ -80,7 +81,7 @@ public class OBDPublicationBridge {
         }
         return pubGraph;
     }
-    
+
     private List<Author> parseAuthors(Element authorsElement) {
         final List<Author> authors = new ArrayList<Author>();
         for (Object authorObj : authorsElement.getChildren("author")) {
@@ -95,7 +96,10 @@ public class OBDPublicationBridge {
         }
         return authors;
     }
-    
+
+    /**
+     * Create a short form of the author list for use in an abbreviated label for the publication.
+     */
     private String createAuthorLabel(List<Author> authors) {
         if (authors.isEmpty()) {
             return "";
@@ -107,30 +111,69 @@ public class OBDPublicationBridge {
             return authors.get(0).getSurname() + " et al.";
         }
     }
+
+    /**
+     * Create a full author list for use in a bibliographic citation for the publication.
+     */
+    private String createCitationAuthors(List<Author> authors) {
+        if (authors.isEmpty()) {
+            return "";
+        } else {
+            final StringBuffer sb = new StringBuffer();
+            final Iterator<Author> authorsIterator = authors.iterator();
+            boolean first = true;
+            while (authorsIterator.hasNext()) {
+                final Author author = authorsIterator.next();
+                if (first) {
+                    first = false;
+                    sb.append(author.getSurname() + ", " + author.getFirstName());
+                } else {
+                    if (authorsIterator.hasNext()) { 
+                        sb.append(", ");
+                    } else {
+                        if (authors.size() > 2) { sb.append(","); }
+                        sb.append(" and ");
+                    }
+                    sb.append(author.getFirstName() + " " + author.getSurname());
+                }
+            }
+            return sb.toString();
+        }
+    }
     
+    private String createFullCitation(List<Author> authors, String year, String title) {
+        //TODO this is sufficient for autocomplete search, but need to add journal, volume, etc.
+        String citationAuthors = this.createCitationAuthors(authors);
+        if (!citationAuthors.endsWith(".")) {
+            citationAuthors += "."; 
+        }
+        return String.format("%s %s. %s.", citationAuthors, year, title);
+    }
+
     private static class Author {
-        
+
         private final String surname;
         private final String firstName;
-        
+
         public Author(String surname, String firstName) {
             this.surname = surname;
             this.firstName = firstName;
         }
-        
+
         public String getSurname() {
             return this.surname;
         }
-        
+
         public String getFirstName() {
             return this.firstName;
         }
+
     }
 
     private Logger log() {
         return Logger.getLogger(this.getClass());
     }
-    
+
     /**
      * This main is simply for interactive testing.
      */
@@ -144,5 +187,5 @@ public class OBDPublicationBridge {
             System.out.println(statement);
         }
     }
-    
+
 }

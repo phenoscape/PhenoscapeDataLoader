@@ -4,6 +4,32 @@ public class Vocab {
 
     public static final String PUB_HAS_DATE = "dc:date";
     public static final String PUB_HAS_ABSTRACT = "dc:abstract";
+    public static final String PUB_HAS_CITATION = "dc:bibliographicCitation";
     public static final String PUBLICATION_TYPE_ID = "PHENOSCAPE:Publication";
+    public static final String DATASET_TYPE_ID = "cdao:CharacterStateDataMatrix";
+    public static final String STATE_TYPE_ID = "cdao:CharacterStateDomain";
+    public static final String CELL_TYPE_ID = "cdao:CharacterStateDatum";
+    public static final String CHARACTER_TYPE_ID = "cdao:Character";
+    public static final String OTU_TYPE_ID = "cdao:TU";
+    public static final String SPECIMEN_TYPE_ID = "PHENOSCAPE:Specimen";
+    public static final String HAS_PUB_REL_ID = "PHENOSCAPE:has_publication";
+    public static final String HAS_SPECIMEN_REL_ID = "PHENOSCAPE:has_specimen";
+    public static final String HAS_STATE_REL_ID = "cdao:has_Datum";
+    public static final String REFERS_TO_TAXON_REL_ID = "PHENOSCAPE:has_taxon";
+    public static final String HAS_TU_REL_ID = "cdao:has_TU";
+    public static final String HAS_CHARACTER_REL_ID = "cdao:has_Character";
+    public static final String HAS_PHENOTYPE_REL_ID = "cdao:has_Phenotype";
+    public static final String TAXON_PHENOTYPE_REL_ID = "PHENOSCAPE:exhibits";
+    public static final String CELL_TO_STATE_REL_ID = "cdao:has_State";
+    public static final String ANNOT_TO_CELL_REL_ID = "PHENOSCAPE:has_source";
+    public static final String SPECIMEN_TO_COLLECTION_REL_ID = "PHENOSCAPE:belongs_to_collection";
+    public static final String SPECIMEN_TO_CATALOG_ID_REL_ID = "PHENOSCAPE:has_catalog_id";
+    public static final String HAS_CURATORS_REL_ID = "PHENOSCAPE:has_curators";
+    public static final String HAS_COMMENT_REL_ID = "PHENOSCAPE:has_comment";
+    public static final String HAS_NUMBER_REL_ID = "PHENOSCAPE:has_number";
+    public static final String HAS_COUNT_REL_ID = "PHENOSCAPE:has_count";
+    public static final String HAS_MSRMNT_REL_ID = "PHENOSCAPE:has_measurement";
+    public static final String HAS_UNIT_REL_ID = "PHENOSCAPE:has_unit";
+    public static final String HAS_PUBLICATION_NAME = "PHENOSCAPE:has_publication_name";
 
 }
