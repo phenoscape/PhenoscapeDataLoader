@@ -1,4 +1,4 @@
-package org.phenoscape.obd;
+package org.phenoscape.obd.loader;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

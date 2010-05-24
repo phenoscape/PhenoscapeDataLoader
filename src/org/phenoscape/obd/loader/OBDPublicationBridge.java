@@ -1,4 +1,4 @@
-package org.phenoscape.obd;
+package org.phenoscape.obd.loader;
 
 import java.io.File;
 import java.io.IOException;
@@ -178,13 +178,13 @@ public class OBDPublicationBridge {
      * This main is simply for interactive testing.
      */
     public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
-        Logger.getRootLogger().setLevel(Level.ALL);
+        Logger.getRootLogger().setLevel(Level.ERROR);
         final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
         final Document doc = docBuilder.parse(new File("/Users/jim/Downloads/Phenoscape_pubs_A_papers.xml"));
         final Graph graph = new OBDPublicationBridge().translate(doc);
         for (Statement statement : graph.getAllStatements()) {
-            System.out.println(statement);
+            //System.out.println(statement);
         }
     }
 

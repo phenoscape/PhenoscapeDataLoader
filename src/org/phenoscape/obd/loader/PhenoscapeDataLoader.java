@@ -1,4 +1,4 @@
-package org.phenoscape.obd;
+package org.phenoscape.obd.loader;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class PhenoscapeDataLoader {
         this.session = this.loadOBOSession();
     }
 
-    public static void main(String[] args) throws XmlException, IOException, SQLException, ClassNotFoundException {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
         PhenoscapeDataLoader pdl = new PhenoscapeDataLoader();
         pdl.processDataFolder(new File(args[0]));
     }

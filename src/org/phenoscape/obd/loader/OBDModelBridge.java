@@ -1,4 +1,4 @@
-package org.phenoscape.obd;
+package org.phenoscape.obd.loader;
 
 import java.io.IOException;
 import java.util.HashMap;

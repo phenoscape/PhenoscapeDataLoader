@@ -1,4 +1,4 @@
-package org.phenoscape.obd;
+package org.phenoscape.obd.loader;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,9 +13,9 @@ import org.obd.query.Shard;
 import org.obd.query.impl.AbstractSQLShard;
 import org.obd.query.impl.OBDSQLShard;
 
-public class TaxonAnnotationCounter {
+public class KbRefreshTimestamp {
 	/**
-	 * This class counts the phenotypes associated with every taxon
+	 * This class counts the phenotypes associated with every gene
 	 * and loads them into a static text file
 	 */
 	
@@ -35,69 +35,52 @@ public class TaxonAnnotationCounter {
 
     /**
 	 * @INPUT - None
-     * This query retrieves the number of annotations for every TAXON. 
-     * These counts are returned in order from 
-     * the highest to the lowest
+     * This query retrieves the KB refresh timestamp
      */
-    private String taxonCountQuery = 
+    private String geneCountQuery = 
     	"SELECT " +
-    	"taxon_node.uid AS taxon_id, " +
-    	"taxon_node.label AS taxon, " +
-    	"COUNT(*) AS annotation_count " +
+    	"notes " +
     	"FROM " +
-    	"node AS taxon_node " +
-    	"JOIN (link AS exhibits_link " +
-    	"JOIN node AS phenotype_node " +
-    	"ON (phenotype_node.node_id = exhibits_link.object_id)) " +
-    	"ON (taxon_node.node_id = exhibits_link.node_id AND " +
-    	"	taxon_node.source_id = (SELECT node_id FROM node WHERE uid = 'teleost-taxonomy')) " +
-    	"WHERE " +
-    	"exhibits_link.is_inferred = 'f' AND " +
-    	"exhibits_link.predicate_id = (SELECT node_id FROM node WHERE uid = 'PHENOSCAPE:exhibits') " +
-    	"GROUP BY taxon_node.uid, taxon_node.label " +
-    	"ORDER BY annotation_count DESC ";
+    	"obd_schema_metadata";
     
-    private String textFileLocation = System.getProperty(TEXT_FILE_LOC) + "/annotationCountByTaxon.txt";
+    private String textFileLocation = System.getProperty(TEXT_FILE_LOC) + "/kbRefreshTimestamp.txt";
     
     /**
      * Constructor initializes the shard and the connection to the database
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public TaxonAnnotationCounter() throws SQLException, ClassNotFoundException {
+    public KbRefreshTimestamp() throws SQLException, ClassNotFoundException {
 		super();
 		this.shard = this.initializeShard();
 		this.conn = ((AbstractSQLShard)shard).getConnection();
+	
 	}
     
     /**
-     * @PURPOSE The purpose of this method is to get the count of phenotyper annotation
-     * for every taxon and write these counts to a tab delimited text file
+     * @PURPOSE The purpose of this method is to get the timestamp when the KB was last refreshed 
+     * and write this to a text file
      * @throws SQLException
      * @throws IOException
      */
-    private void writeAnnotationCountsToFile() 
+    private void writeTimestampToFile() 
 		throws SQLException, IOException{
     	
     	Statement pStmt  = conn.createStatement();
     	BufferedWriter bw = new BufferedWriter(new FileWriter(new File(textFileLocation)));
-    	String entityId, entity, line;
-    	int count;
+    	String timestamp;
 
-    	ResultSet rs = pStmt.executeQuery(taxonCountQuery);
+    	ResultSet rs = pStmt.executeQuery(geneCountQuery);
     	while(rs.next()){
-    		entityId = rs.getString(1);
-    		entity = rs.getString(2);
-    		count = rs.getInt(3);
-    		line = entityId + "\t\t" + entity + "\t\t" + count + "\n";
-			bw.write(line);
+    		timestamp = rs.getString(1);
+    		timestamp = timestamp.substring(0, timestamp.indexOf("_"));
+			bw.write(timestamp);
     	}
-
     	bw.flush();
     	bw.close();
 	}
     
-    /**
+	/**
      * This method connects the shard to the database given the systems
      * parameters for DB location, name, DB username and DB password
      * @return
@@ -109,17 +92,17 @@ public class TaxonAnnotationCounter {
         obdsql.connect("jdbc:postgresql://" + System.getProperty(DB_HOST) + "/" + System.getProperty(DB_NAME), System.getProperty(DB_USER), System.getProperty(DB_PASSWORD));
         return obdsql;
     }
-    
+
     /**
-     * @PURPOSE This is the main method, which creates an instance of the GAC and invokes the instance method
-     * 'writeAnnotationCounts'
+     * @PURPOSE This is the main method, which creates an instance of the KRT and invokes the instance method
+     * 'writeTimestampToFile'
      * @param args
      * @throws SQLException
      * @throws ClassNotFoundException
      * @throws IOException
      */
     public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException{
-    	TaxonAnnotationCounter tac = new TaxonAnnotationCounter();
-    	tac.writeAnnotationCountsToFile();
+    	KbRefreshTimestamp krt = new KbRefreshTimestamp();
+    	krt.writeTimestampToFile();
     }
 }
