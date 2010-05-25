@@ -31,5 +31,10 @@ public class Vocab {
     public static final String HAS_MSRMNT_REL_ID = "PHENOSCAPE:has_measurement";
     public static final String HAS_UNIT_REL_ID = "PHENOSCAPE:has_unit";
     public static final String HAS_PUBLICATION_NAME = "PHENOSCAPE:has_publication_name";
-
+    public static final String GENOTYPE_PHENOTYPE_REL_ID = "OBO_REL:influences";
+    public static final String GENOTYPE_GENE_REL_ID = "OBO_REL:variant_of";
+    public static final String GENOTYPE_TYPE_ID = "SO:0001027";
+    public static final String GENE_TYPE_ID = "SO:0000704";
+    public static final String POSITED_BY_REL_ID = "posited_by";
+    
 }

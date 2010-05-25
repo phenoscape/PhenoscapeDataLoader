@@ -58,17 +58,10 @@ public class ZfinObdBridge {
     /** The pheno-environment-url system property should contain the URL of the ZFIN pheno environment file. */
     public static final String PHENO_ENVIRONMENT_URL = "pheno-environment-url";
 
-    public static final String DATASET_TYPE_ID = "cdao:CharacterStateDataMatrix";
-    public static final String GENOTYPE_PHENOTYPE_REL_ID = "PHENOSCAPE:exhibits";
-    public static final String GENE_GENOTYPE_REL_ID = "PHENOSCAPE:has_allele";
-    public static final String PUBLICATION_TYPE_ID = "PHENOSCAPE:Publication";
-    public static final String HAS_PUB_REL_ID = "PHENOSCAPE:has_publication";
-    public static final String GENOTYPE_TYPE_ID = "SO:0001027";
-    public static final String GENE_TYPE_ID = "SO:0000704";
-    public static final String POSITED_BY_REL_ID = "posited_by";
 
-    private final String MORPHOLINO_STRING = "morpholino";
-    private final String WILD_TYPE_STRING = "wild type (unspecified)";
+
+    private static final String MORPHOLINO = "morpholino";
+    private static final String WILD_TYPE = "wild type (unspecified)";
 
     private static final RelationVocabulary relationVocabulary = new RelationVocabulary();
 
@@ -191,7 +184,7 @@ public class ZfinObdBridge {
 
         while((line = reader.readLine()) != null){
             String[] lComps = line.split("\\t");
-            if(lComps[1].equals(MORPHOLINO_STRING)){
+            if(lComps[1].equals(MORPHOLINO)){
                 environmentId = normalizetoZfin(lComps[0]);
                 morpholinoId = this.normalizetoZfin(lComps[2]);
                 this.envToMorpholinoMap.put(environmentId, morpholinoId);
@@ -367,7 +360,7 @@ public class ZfinObdBridge {
             pub = pComps[8];
             environmentId = pComps[9];
 
-            if(genotype.equals(this.WILD_TYPE_STRING)){
+            if(genotype.equals(this.WILD_TYPE)){
                 genotypeId = this.envToMorpholinoMap.get(environmentId);
                 genotype = this.morpholinoIdToLabelMap.get(genotypeId);
                 if(genotypeId != null)
@@ -383,7 +376,7 @@ public class ZfinObdBridge {
                 cd.setId(phenoId);
                 graph.addStatements(cd);
 
-                Node geneNode = createInstanceNode(geneId, GENE_TYPE_ID);
+                Node geneNode = createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
                 String geneName = this.zfinGeneIdToNameMap.get(geneId);
                 String geneSymbol = this.zfinGeneIdToSymbolMap.get(geneId);
                 if(geneName != null){
@@ -398,12 +391,12 @@ public class ZfinObdBridge {
                 }
                 graph.addNode(geneNode);
 
-                Node genotypeNode = createInstanceNode(genotypeId, GENOTYPE_TYPE_ID);
+                Node genotypeNode = createInstanceNode(genotypeId, Vocab.GENOTYPE_TYPE_ID);
                 if(genotype != null)
                     genotypeNode.setLabel(genotype);
                 graph.addNode(genotypeNode);
-                this.createLinkStatementAndAddToGraph(geneId, GENE_GENOTYPE_REL_ID, genotypeId);
-                genotypeToPhenotypeLink = this.createLinkStatementAndAddToGraph(genotypeId, GENOTYPE_PHENOTYPE_REL_ID, phenoId);
+                this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_GENE_REL_ID, geneId);
+                genotypeToPhenotypeLink = this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenoId);
 
                 /*//TODO This may have to be refined for future implementation Cartik 10/27/09
             	if (!pub.equals("")) {
