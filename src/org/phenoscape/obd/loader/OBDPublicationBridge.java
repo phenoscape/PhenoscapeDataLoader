@@ -31,6 +31,8 @@ public class OBDPublicationBridge {
             final Graph pubGraph = this.translateRecord(record);
             graph.merge(pubGraph);
         }
+        final Node pubNamespaceNode = new Node(Vocab.PUB_NAMESPACE);
+        graph.addNode(pubNamespaceNode);
         return graph;
     }
 
@@ -40,6 +42,7 @@ public class OBDPublicationBridge {
         if (accessionNumElement != null) {
             final String pubID = accessionNumElement.getValue().trim();
             final Node pubNode = OBDUtil.createInstanceNode(pubID, Vocab.PUBLICATION_TYPE_ID);
+            pubNode.setSourceId(Vocab.PUB_NAMESPACE);
             final Element yearElement = record.getChild("dates").getChild("year");
             String year = null;
             if (yearElement != null) {
@@ -73,7 +76,8 @@ public class OBDPublicationBridge {
                 final String abstractText = abstractElement.getValue().trim(); //TODO handle italics properly
                 pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_ABSTRACT, abstractText);
             }
-            pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_CITATION, this.createFullCitation(authors, year, title));
+            final String fullCitation = this.createFullCitation(authors, year, title);
+            pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_CITATION, fullCitation);
             log().debug("Adding pub: " + pubNode);
             pubGraph.addNode(pubNode);
         } else {

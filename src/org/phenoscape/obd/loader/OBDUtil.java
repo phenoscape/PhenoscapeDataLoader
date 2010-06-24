@@ -37,7 +37,7 @@ public class OBDUtil {
     
     public static Node createInstanceNode(String id, String typeID) {
         final Node n = new Node(id);
-        n.setMetatype(Metatype.CLASS);  //why is this CLASS? should it be INSTANCE??
+        n.setMetatype(Metatype.INSTANCE);
         n.addStatement(new LinkStatement(id, vocab.instance_of(), typeID));
         return n;
     }
