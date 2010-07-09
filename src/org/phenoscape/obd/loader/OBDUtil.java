@@ -35,6 +35,11 @@ public class OBDUtil {
         }
     }
     
+    /**
+     * Create a new instance node of the given type with the given ID.
+     * @param id the ID of the new instance node
+     * @param typeID the ID of the class of this instance
+     */
     public static Node createInstanceNode(String id, String typeID) {
         final Node n = new Node(id);
         n.setMetatype(Metatype.INSTANCE);

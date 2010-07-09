@@ -21,7 +21,6 @@ import org.obd.model.LinkStatement;
 import org.obd.model.Node;
 import org.obd.model.NodeAlias;
 import org.obd.model.CompositionalDescription.Predicate;
-import org.obd.model.Node.Metatype;
 import org.obd.query.Shard;
 import org.obd.query.impl.OBDSQLShard;
 import org.obo.dataadapter.OBOAdapter;
@@ -360,10 +359,10 @@ public class ZfinObdBridge {
             pub = pComps[8];
             environmentId = pComps[9];
 
-            if(genotype.equals(this.WILD_TYPE)){
+            if (genotype.equals(WILD_TYPE)) {
                 genotypeId = this.envToMorpholinoMap.get(environmentId);
                 genotype = this.morpholinoIdToLabelMap.get(genotypeId);
-                if(genotypeId != null)
+                if (genotypeId != null)
                     geneId = this.morpholinoToGeneMap.get(genotypeId);
             }
             else {
@@ -376,7 +375,7 @@ public class ZfinObdBridge {
                 cd.setId(phenoId);
                 graph.addStatements(cd);
 
-                Node geneNode = createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
+                Node geneNode = OBDUtil.createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
                 String geneName = this.zfinGeneIdToNameMap.get(geneId);
                 String geneSymbol = this.zfinGeneIdToSymbolMap.get(geneId);
                 if (geneSymbol != null) {
@@ -389,32 +388,15 @@ public class ZfinObdBridge {
                     graph.addStatement(na);
                 }
                 graph.addNode(geneNode);
-                Node genotypeNode = createInstanceNode(genotypeId, Vocab.GENOTYPE_TYPE_ID);
+                Node genotypeNode = OBDUtil.createInstanceNode(genotypeId, Vocab.GENOTYPE_TYPE_ID);
                 if(genotype != null) genotypeNode.setLabel(genotype);
                 graph.addNode(genotypeNode);
                 this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_GENE_REL_ID, geneId);
+                //could do this with the reasoner, but we already know it here
+                this.createLinkStatementAndAddToGraph(geneId, Vocab.GENOTYPE_GENE_REL_ID, geneId);
                 genotypeToPhenotypeLink = this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenoId);
-
-                /*//TODO This may have to be refined for future implementation Cartik 10/27/09
-            	if (!pub.equals("")) {
-            		Node publicationNode = createInstanceNode(pub, PUBLICATION_TYPE_ID);
-            		graph.addNode(publicationNode);
-
-            		String dsId = UUID.randomUUID().toString();
-            		Node dsNode = createInstanceNode(dsId, DATASET_TYPE_ID);
-            		graph.addNode(dsNode);
-
-            		LinkStatement dsLink = new LinkStatement();
-            		dsLink.setRelationId(POSITED_BY_REL_ID);
-            		dsLink.setTargetId(dsId);
-            		genotypeToPhenotypeLink.addSubStatement(dsLink);
-
-            		this.createLinkStatementAndAddToGraph(dsId, HAS_PUB_REL_ID, pub);
-            	}
-                 */
             }
         }
-
         this.shard.putGraph(graph);
     }
 
@@ -422,20 +404,11 @@ public class ZfinObdBridge {
         return ((string.startsWith("ZFIN:"))?string:"ZFIN:" + string);
     }
 
-    protected Node createInstanceNode(String id, String typeId) {
-        Node n = new Node(id);
-        n.setMetatype(Metatype.CLASS);
-        n.addStatement(new LinkStatement(id, relationVocabulary.instance_of(),
-                typeId));
-        return n;
-    }
-
     private LinkStatement createLinkStatementAndAddToGraph(String subject, String predicate, String object){
         LinkStatement ls = new LinkStatement();
         ls.setNodeId(subject);
         ls.setRelationId(predicate);
         ls.setTargetId(object);
-
         graph.addStatement(ls);
         return ls;
     }
