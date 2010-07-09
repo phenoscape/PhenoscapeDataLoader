@@ -366,11 +366,11 @@ public class ZfinObdBridge {
                 if(genotypeId != null)
                     geneId = this.morpholinoToGeneMap.get(genotypeId);
             }
-            else{
+            else {
                 geneId = this.genotypeToGeneMap.get(genotypeId);
             }
 
-            if(geneId != null && genotypeId != null){
+            if (geneId != null && genotypeId != null) {
                 CompositionalDescription cd = this.postComposeTerms(pComps);
                 String phenoId = cd.generateId();
                 cd.setId(phenoId);
@@ -379,21 +379,18 @@ public class ZfinObdBridge {
                 Node geneNode = createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
                 String geneName = this.zfinGeneIdToNameMap.get(geneId);
                 String geneSymbol = this.zfinGeneIdToSymbolMap.get(geneId);
-                if(geneName != null){
-                    geneNode.setLabel(geneName);
+                if (geneSymbol != null) {
+                    geneNode.setLabel(geneSymbol);
                     NodeAlias na = new NodeAlias();
                     na.setNodeId(geneId);
-                    na.setTargetId(geneSymbol);
+                    if (geneName != null) {
+                        na.setTargetId(geneName);
+                    }
                     graph.addStatement(na);
                 }
-                else{
-                    geneNode.setLabel(geneSymbol);
-                }
                 graph.addNode(geneNode);
-
                 Node genotypeNode = createInstanceNode(genotypeId, Vocab.GENOTYPE_TYPE_ID);
-                if(genotype != null)
-                    genotypeNode.setLabel(genotype);
+                if(genotype != null) genotypeNode.setLabel(genotype);
                 graph.addNode(genotypeNode);
                 this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_GENE_REL_ID, geneId);
                 genotypeToPhenotypeLink = this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenoId);

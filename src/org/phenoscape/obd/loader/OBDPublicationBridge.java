@@ -44,7 +44,7 @@ public class OBDPublicationBridge {
             final Node pubNode = OBDUtil.createInstanceNode(pubID, Vocab.PUBLICATION_TYPE_ID);
             pubNode.setSourceId(Vocab.PUB_NAMESPACE);
             final Element yearElement = record.getChild("dates").getChild("year");
-            String year = null;
+            final String year;
             if (yearElement != null) {
                 year = yearElement.getValue().trim();
                 if (year.length() > 0) {
@@ -53,6 +53,7 @@ public class OBDPublicationBridge {
                     log().error("No year for publication: " + pubID);
                 }
             } else {
+                year = null;
                 log().error("No year for publication: " + pubID);
             }
             final List<Author> authors = this.parseAuthors(record.getChild("contributors").getChild("authors"));
