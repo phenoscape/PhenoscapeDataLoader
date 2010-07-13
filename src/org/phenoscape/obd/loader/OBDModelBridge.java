@@ -244,7 +244,7 @@ public class OBDModelBridge {
             cd.addArgument(Vocab.HAS_COUNT_REL_ID, count + "");
         }
         if(m != null && u != null){
-            cd.addArgument(Vocab.HAS_MSRMNT_REL_ID, m + "");
+            cd.addArgument(Vocab.HAS_MEASUREMENT_REL_ID, m + "");
             cd.addArgument(Vocab.HAS_UNIT_REL_ID, u.getName());
         }
         cd.setId(cd.generateId());

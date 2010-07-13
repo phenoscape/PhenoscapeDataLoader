@@ -29,7 +29,7 @@ public class Vocab {
     public static final String HAS_COMMENT_REL_ID = "PHENOSCAPE:has_comment";
     public static final String HAS_NUMBER_REL_ID = "PHENOSCAPE:has_number";
     public static final String HAS_COUNT_REL_ID = "PHENOSCAPE:has_count";
-    public static final String HAS_MSRMNT_REL_ID = "PHENOSCAPE:has_measurement";
+    public static final String HAS_MEASUREMENT_REL_ID = "PHENOSCAPE:has_measurement";
     public static final String HAS_UNIT_REL_ID = "PHENOSCAPE:has_unit";
     public static final String HAS_PUBLICATION_NAME = "PHENOSCAPE:has_publication_name";
     public static final String GENOTYPE_PHENOTYPE_REL_ID = "OBO_REL:influences";

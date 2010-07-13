@@ -392,9 +392,9 @@ public class ZfinObdBridge {
                 if(genotype != null) genotypeNode.setLabel(genotype);
                 graph.addNode(genotypeNode);
                 this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_GENE_REL_ID, geneId);
-                //could do this with the reasoner, but we already know it here
-                this.createLinkStatementAndAddToGraph(geneId, Vocab.GENOTYPE_GENE_REL_ID, geneId);
                 genotypeToPhenotypeLink = this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenoId);
+                //could do this with the reasoner, but we already know it here
+                this.createLinkStatementAndAddToGraph(geneId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenoId);
             }
         }
         this.shard.putGraph(graph);
