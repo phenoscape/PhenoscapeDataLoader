@@ -37,5 +37,6 @@ public class Vocab {
     public static final String GENOTYPE_TYPE_ID = "SO:0001027";
     public static final String GENE_TYPE_ID = "SO:0000704";
     public static final String POSITED_BY_REL_ID = "posited_by";
+    public static final String GENE_NAMESPACE = "zfin_gene";
     
 }

@@ -376,6 +376,7 @@ public class ZfinObdBridge {
                 graph.addStatements(cd);
 
                 Node geneNode = OBDUtil.createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
+                geneNode.setSourceId(Vocab.GENE_NAMESPACE);
                 String geneName = this.zfinGeneIdToNameMap.get(geneId);
                 String geneSymbol = this.zfinGeneIdToSymbolMap.get(geneId);
                 if (geneSymbol != null) {
