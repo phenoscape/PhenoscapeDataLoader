@@ -16,7 +16,9 @@ import org.jdom.Element;
 import org.jdom.input.DOMBuilder;
 import org.obd.model.Graph;
 import org.obd.model.Node;
+import org.obd.model.NodeAlias;
 import org.obd.model.Statement;
+import org.obd.model.NodeAlias.Scope;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -79,6 +81,9 @@ public class OBDPublicationBridge {
             }
             final String fullCitation = this.createFullCitation(authors, year, title);
             pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_CITATION, fullCitation);
+            final NodeAlias fullCitationAsSynonym = new NodeAlias(pubID, fullCitation);
+            fullCitationAsSynonym.setScope(Scope.EXACT);
+            pubGraph.addStatement(fullCitationAsSynonym);
             log().debug("Adding pub: " + pubNode);
             pubGraph.addNode(pubNode);
         } else {
