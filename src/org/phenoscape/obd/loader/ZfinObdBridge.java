@@ -340,14 +340,11 @@ public class ZfinObdBridge {
     }
 
     public void loadZfinData() throws MalformedURLException, IOException {
-        String phenoFileLine;
-        String genotypeId, genotype, pub, qualityId, environmentId, geneId = null; 
-        LinkStatement genotypeToPhenotypeLink;
-
-        URL phenotypeURL = new URL(System.getProperty(PHENOTYPE_URL));
-
+        final URL phenotypeURL = new URL(System.getProperty(PHENOTYPE_URL));
         BufferedReader br1 = new BufferedReader(new InputStreamReader(phenotypeURL.openStream()));
+        String phenoFileLine;
         while ((phenoFileLine = br1.readLine()) != null) {
+            String genotypeId, genotype, publicationID, qualityId, environmentId, geneId = null; 
             String[] pComps = phenoFileLine.split("\\t");
             if(pComps.length < 10){ 
                 log().info("Skipping line because of inadequate number of tab delimited components: " + phenoFileLine);
@@ -356,32 +353,32 @@ public class ZfinObdBridge {
             genotypeId = pComps[0];
             genotype = pComps[1];
             qualityId = pComps[6];
-            pub = pComps[8];
+            publicationID = pComps[8];
             environmentId = pComps[9];
 
+            final boolean isMorpholino;
             if (genotype.equals(WILD_TYPE)) {
+                isMorpholino = true;
                 genotypeId = this.envToMorpholinoMap.get(environmentId);
                 genotype = this.morpholinoIdToLabelMap.get(genotypeId);
-                if (genotypeId != null)
-                    geneId = this.morpholinoToGeneMap.get(genotypeId);
-            }
-            else {
+                if (genotypeId != null) { geneId = this.morpholinoToGeneMap.get(genotypeId); }
+
+            } else {
+                isMorpholino = false;
                 geneId = this.genotypeToGeneMap.get(genotypeId);
             }
-
             if (geneId != null && genotypeId != null) {
-                CompositionalDescription cd = this.postComposeTerms(pComps);
-                String phenoId = cd.generateId();
-                cd.setId(phenoId);
+                final CompositionalDescription cd = this.postComposeTerms(pComps);
+                final String phenotypeID = cd.generateId();
+                cd.setId(phenotypeID);
                 graph.addStatements(cd);
-
-                Node geneNode = OBDUtil.createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
+                final Node geneNode = OBDUtil.createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
                 geneNode.setSourceId(Vocab.GENE_NAMESPACE);
-                String geneName = this.zfinGeneIdToNameMap.get(geneId);
-                String geneSymbol = this.zfinGeneIdToSymbolMap.get(geneId);
+                final String geneName = this.zfinGeneIdToNameMap.get(geneId);
+                final String geneSymbol = this.zfinGeneIdToSymbolMap.get(geneId);
                 if (geneSymbol != null) {
                     geneNode.setLabel(geneSymbol);
-                    NodeAlias na = new NodeAlias();
+                    final NodeAlias na = new NodeAlias();
                     na.setNodeId(geneId);
                     if (geneName != null) {
                         na.setTargetId(geneName);
@@ -389,29 +386,29 @@ public class ZfinObdBridge {
                     graph.addStatement(na);
                 }
                 graph.addNode(geneNode);
-                Node genotypeNode = OBDUtil.createInstanceNode(genotypeId, Vocab.GENOTYPE_TYPE_ID);
-                if(genotype != null) genotypeNode.setLabel(genotype);
+                final Node genotypeNode;
+                if (isMorpholino) {
+                    genotypeNode = OBDUtil.createInstanceNode(genotypeId, Vocab.MORPHOLINO_OLIGO);
+                } else {
+                    genotypeNode = OBDUtil.createInstanceNode(genotypeId, Vocab.GENOTYPE_TYPE_ID);
+                }
+                if (genotype != null) genotypeNode.setLabel(genotype);
                 graph.addNode(genotypeNode);
-                this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_GENE_REL_ID, geneId);
-                genotypeToPhenotypeLink = this.createLinkStatementAndAddToGraph(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenoId);
-                //could do this with the reasoner, but we already know it here
-                this.createLinkStatementAndAddToGraph(geneId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenoId);
+                this.graph.addLinkStatement(genotypeNode, Vocab.GENOTYPE_GENE_REL_ID, geneId);
+                final LinkStatement annotation = new LinkStatement(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenotypeID);
+                if (publicationID != null) {
+                    annotation.addSubLinkStatement(Vocab.POSITED_BY_REL_ID, publicationID);  
+                } else {
+                    log().error("No publication for annotation: " + phenoFileLine);
+                }
+                this.graph.addStatement(annotation);
             }
         }
         this.shard.putGraph(graph);
     }
 
     private String normalizetoZfin(String string) {
-        return ((string.startsWith("ZFIN:"))?string:"ZFIN:" + string);
-    }
-
-    private LinkStatement createLinkStatementAndAddToGraph(String subject, String predicate, String object){
-        LinkStatement ls = new LinkStatement();
-        ls.setNodeId(subject);
-        ls.setRelationId(predicate);
-        ls.setTargetId(object);
-        graph.addStatement(ls);
-        return ls;
+        return ((string.startsWith("ZFIN:")) ? string : ("ZFIN:" + string));
     }
 
     private Logger log() {
