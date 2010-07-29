@@ -17,6 +17,7 @@ public class Vocab {
     public static final String HAS_SPECIMEN_REL_ID = "PHENOSCAPE:has_specimen";
     public static final String HAS_STATE_REL_ID = "cdao:has_Datum";
     public static final String REFERS_TO_TAXON_REL_ID = "PHENOSCAPE:has_taxon";
+    public static final String ANNOTATION_TO_OTU_REL_ID = "PHENOSCAPE:asserted_for_otu";
     public static final String HAS_TU_REL_ID = "cdao:has_TU";
     public static final String HAS_CHARACTER_REL_ID = "cdao:has_Character";
     public static final String HAS_PHENOTYPE_REL_ID = "cdao:has_Phenotype";
