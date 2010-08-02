@@ -40,5 +40,5 @@ public class Vocab {
     public static final String MORPHOLINO_OLIGO = "SO:0000034";
     public static final String POSITED_BY_REL_ID = "posited_by";
     public static final String GENE_NAMESPACE = "zfin_gene";
-    
+    public static final String FULL_NAME_SYNONYM_CATEGORY = "FULLNAME";
 }

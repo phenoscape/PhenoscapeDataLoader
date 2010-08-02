@@ -21,6 +21,7 @@ import org.obd.model.LinkStatement;
 import org.obd.model.Node;
 import org.obd.model.NodeAlias;
 import org.obd.model.CompositionalDescription.Predicate;
+import org.obd.model.NodeAlias.Scope;
 import org.obd.query.Shard;
 import org.obd.query.impl.OBDSQLShard;
 import org.obo.dataadapter.OBOAdapter;
@@ -378,12 +379,14 @@ public class ZfinObdBridge {
                 final String geneSymbol = this.zfinGeneIdToSymbolMap.get(geneId);
                 if (geneSymbol != null) {
                     geneNode.setLabel(geneSymbol);
-                    final NodeAlias na = new NodeAlias();
-                    na.setNodeId(geneId);
                     if (geneName != null) {
+                        final NodeAlias na = new NodeAlias();
+                        na.setNodeId(geneId);
                         na.setTargetId(geneName);
+                        na.setScope(Scope.EXACT);
+                        na.setCategoryId(Vocab.FULL_NAME_SYNONYM_CATEGORY);
+                        graph.addStatement(na);
                     }
-                    graph.addStatement(na);
                 }
                 graph.addNode(geneNode);
                 final Node genotypeNode;
