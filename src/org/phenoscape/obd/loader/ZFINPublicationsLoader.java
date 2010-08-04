@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 
 import org.obd.model.Graph;
@@ -43,7 +44,7 @@ public class ZFINPublicationsLoader {
 
     private BufferedReader getPublicationsData() throws IOException {
         final URL phenotypeURL = new URL(System.getProperty(PUBLICATIONS_URL));
-        return new BufferedReader(new InputStreamReader(phenotypeURL.openStream()));
+        return new BufferedReader(new InputStreamReader(phenotypeURL.openStream(), Charset.forName("ISO-8859-1")));
     }
 
     private Node parsePublicationLine(String line) {
