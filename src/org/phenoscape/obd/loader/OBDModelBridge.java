@@ -72,12 +72,10 @@ public class OBDModelBridge {
         // Dataset metadata
         this.graph.addNode(OBDUtil.createInstanceNode(dsId, Vocab.DATASET_TYPE_ID));
         final String curators = dataset.getCurators();
-        final Node pubNode = OBDUtil.createInstanceNode(dataset.getPublication(), Vocab.PUBLICATION_TYPE_ID);
-        this.graph.addNode(pubNode);
-        LinkStatement ds2p = new LinkStatement(dsId, Vocab.HAS_PUB_REL_ID, pubNode.getId());
+        LinkStatement ds2p = new LinkStatement(dsId, Vocab.HAS_PUB_REL_ID, dataset.getPublication());
         graph.addStatement(ds2p);
 
-        if(curators != null){
+        if (curators != null) {
             LiteralStatement ds2curators = new LiteralStatement(dsId, Vocab.HAS_CURATORS_REL_ID, curators);
             graph.addStatement(ds2curators);
         }
