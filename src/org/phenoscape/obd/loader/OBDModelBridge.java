@@ -203,43 +203,43 @@ public class OBDModelBridge {
         return graph;
     }
 
-    public CompositionalDescription translate(Phenotype p) throws IOException {
-        OBOClass e = p.getEntity();
-        OBOClass q = p.getQuality();
-        OBOClass e2 = p.getRelatedEntity();
-        OBOClass u = p.getUnit();
+    public CompositionalDescription translate(Phenotype phenotype) throws IOException {
+        final OBOClass entity = phenotype.getEntity();
+        final OBOClass quality = phenotype.getQuality();
+        final OBOClass relatedEntity = phenotype.getRelatedEntity();
+        final OBOClass unit = phenotype.getUnit();
         // we are temporarily using the comment field to store count information,
         // which often contains non-integer characters such as > or <
-        String count = p.getComment();
-        Float m = p.getMeasurement();
-        if (e == null) {
+        final String count = phenotype.getComment();
+        final Float measurement = phenotype.getMeasurement();
+        if (entity == null) {
             return null;
         }
-        if (q == null) {
+        if (quality == null) {
             return null;
         }
-        if (m != null && u == null) {
+        if (measurement != null && unit == null) {
             return null;
         }
         // cd.addArgument("has_measurement",m);
-        CompositionalDescription cd = new CompositionalDescription(Predicate.INTERSECTION);
-        cd.addArgument(q.getID());
+        final CompositionalDescription phenotypeNode = new CompositionalDescription(Predicate.INTERSECTION);
+        phenotypeNode.addArgument(OBDUtil.translateOBOClass(quality));
         // check to avoid a NullPointerException
-        if (e.getParents() != null) {
-            cd.addArgument(relationVocabulary.inheres_in(), OBDUtil.translateOBOClass(e));
+        if (entity.getParents() != null) {
+            phenotypeNode.addArgument(relationVocabulary.inheres_in(), OBDUtil.translateOBOClass(entity));
         }
-        if (e2 != null)
-            cd.addArgument(relationVocabulary.towards(), OBDUtil.translateOBOClass(e2));
-        if(count != null && count.trim().length() > 0){
-            cd.addArgument(Vocab.HAS_COUNT_REL_ID, count + "");
+        if (relatedEntity != null)
+            phenotypeNode.addArgument(relationVocabulary.towards(), OBDUtil.translateOBOClass(relatedEntity));
+        if (count != null && count.trim().length() > 0){
+            phenotypeNode.addArgument(Vocab.HAS_COUNT_REL_ID, count + "");
         }
-        if(m != null && u != null){
-            cd.addArgument(Vocab.HAS_MEASUREMENT_REL_ID, m + "");
-            cd.addArgument(Vocab.HAS_UNIT_REL_ID, u.getName());
+        if (measurement != null && unit != null){
+            phenotypeNode.addArgument(Vocab.HAS_MEASUREMENT_REL_ID, measurement + "");
+            phenotypeNode.addArgument(Vocab.HAS_UNIT_REL_ID, unit.getName());
         }
-        cd.setId(cd.generateId());
-        getGraph().addStatements(cd);
-        return cd;
+        phenotypeNode.setId(phenotypeNode.generateId());
+        getGraph().addStatements(phenotypeNode);
+        return phenotypeNode;
     }
 
     public Node translate(Taxon taxon) {
