@@ -194,7 +194,7 @@ public class OBDPublicationBridge {
         final Document doc = docBuilder.parse(new File("/Users/jim/Downloads/Phenoscape_pubs_A_papers.xml"));
         final Graph graph = new OBDPublicationBridge().translate(doc);
         for (Statement statement : graph.getAllStatements()) {
-            //System.out.println(statement);
+            System.out.println(statement);
         }
     }
 

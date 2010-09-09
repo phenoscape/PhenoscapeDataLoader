@@ -41,4 +41,5 @@ public class Vocab {
     public static final String POSITED_BY_REL_ID = "posited_by";
     public static final String GENE_NAMESPACE = "zfin_gene";
     public static final String FULL_NAME_SYNONYM_CATEGORY = "FULLNAME";
+    public static final String HAS_DBXREF = "oboInOwl:hasDbXref";
 }
