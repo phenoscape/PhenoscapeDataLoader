@@ -23,8 +23,6 @@ public class AnatomyXrefModifier {
     public static final String DB_USER = "db-user";
     /** The db-password system property should contain the database password. */
     public static final String DB_PASSWORD = "db-password";
-    /** The ontology-dir system property should contain the path to a folder with ontologies to be loaded. */
-    public static final String ONTOLOGY_DIR = "ontology-dir";
 
     private Shard shard;
 
@@ -38,8 +36,6 @@ public class AnatomyXrefModifier {
         final Collection<Node> zfaTerms = this.shard.getNodesBySource("zebrafish_anatomy");
         for (Node term : zfaTerms) {
             log().debug("Term: " + term);
-            //final Collection<Statement> xrefLinks = this.shard.getStatements(term.getId(), Vocab.HAS_DBXREF, null, null, false, false);
-            //final Collection<Statement> xrefLinks = Arrays.asList(term.getStatements());
             final Collection<Statement> xrefLinks = this.shard.getStatementsByNode(term.getId());
             String anatomyXrefID = null;
             String taoID = null;

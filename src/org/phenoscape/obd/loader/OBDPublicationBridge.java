@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
@@ -74,12 +75,26 @@ public class OBDPublicationBridge {
             } else {
                 containerTitle = "";
             }
+            final Element volumeElement = record.getChild("volume");
+            final String volumeText;
+            if (volumeElement != null) {
+                volumeText = volumeElement.getValue().trim();
+            } else {
+                volumeText = "";
+            }
+            final Element pagesElement = record.getChild("pages");
+            final String pagesText;
+            if (pagesElement != null) {
+                pagesText = pagesElement.getValue().trim();
+            } else {
+                pagesText = "";
+            }
             final Element abstractElement = record.getChild("abstract");
             if (abstractElement != null) {
                 final String abstractText = abstractElement.getValue().trim(); //TODO handle italics properly
                 pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_ABSTRACT, abstractText);
             }
-            final String fullCitation = this.createFullCitation(authors, year, title);
+            final String fullCitation = this.createFullCitation(authors, year, title, containerTitle, volumeText, pagesText);
             pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_CITATION, fullCitation);
             final NodeAlias fullCitationAsSynonym = new NodeAlias(pubID, fullCitation);
             fullCitationAsSynonym.setScope(Scope.EXACT);
@@ -151,13 +166,13 @@ public class OBDPublicationBridge {
         }
     }
     
-    private String createFullCitation(List<Author> authors, String year, String title) {
-        //TODO this is sufficient for autocomplete search, but need to add journal, volume, etc.
+    private String createFullCitation(List<Author> authors, String year, String title, String containerTitle, String volume, String pages) {
+        //TODO this could probably be a little smarter
         String citationAuthors = this.createCitationAuthors(authors);
         if (!citationAuthors.endsWith(".")) {
             citationAuthors += "."; 
         }
-        return String.format("%s %s. %s.", citationAuthors, year, title);
+        return String.format("%s %s. %s. %s %s%s%s", citationAuthors, year, title, containerTitle, volume, ((!StringUtils.isBlank(volume) && !StringUtils.isBlank(pages)) ? ":" : ""), pages);
     }
 
     private static class Author {
