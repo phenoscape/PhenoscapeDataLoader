@@ -49,13 +49,13 @@ public class ZFINPublicationsLoader {
 
     private Node parsePublicationLine(String line) {
         final String[] items = line.split("\\t", -1);
-        final String pubID = "ZFIN:" + items[0].trim();
-        final String authors = items[2].trim();
-        final String title = items[3].trim();
-        final String journal = items[4].trim(); 
-        final String year = items[5].trim();
-        final String volume = items[6].trim(); 
-        final String pages = items[7].trim();
+        final String pubID = this.getItem(items, 0);
+        final String authors = this.getItem(items, 2);
+        final String title = this.getItem(items, 3);
+        final String journal = this.getItem(items, 4); 
+        final String year = this.getItem(items, 5);
+        final String volume = this.getItem(items, 6); 
+        final String pages = this.getItem(items, 7);
         final Node pubNode = OBDUtil.createInstanceNode(pubID, Vocab.PUBLICATION_TYPE_ID);
         pubNode.setId(pubID);
         pubNode.setLabel(this.createFullCitation(authors, year, title, journal, volume, pages));
@@ -75,6 +75,10 @@ public class ZFINPublicationsLoader {
     public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
         final ZFINPublicationsLoader loader = new ZFINPublicationsLoader();
         loader.loadPublicationsData();
+    }
+    
+    private String getItem(String[] items, int index) {
+        return (index < items.length) ? items[index].trim() : null;
     }
 
 }
