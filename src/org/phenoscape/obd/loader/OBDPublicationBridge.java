@@ -34,8 +34,6 @@ public class OBDPublicationBridge {
             final Graph pubGraph = this.translateRecord(record);
             graph.merge(pubGraph);
         }
-        final Node pubNamespaceNode = new Node(Vocab.PUB_NAMESPACE);
-        graph.addNode(pubNamespaceNode);
         return graph;
     }
 
