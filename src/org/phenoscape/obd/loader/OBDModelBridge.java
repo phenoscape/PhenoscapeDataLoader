@@ -114,7 +114,7 @@ public class OBDModelBridge {
                                     s.getCollectionCode().getID());
                             graph.addStatement(specimen2collection);
                             //link specimen to catalog id
-                            LinkStatement specimen2catalogId = new LinkStatement(s.toString(), Vocab.SPECIMEN_TO_CATALOG_ID_REL_ID, s.getCatalogID());
+                            LiteralStatement specimen2catalogId = new LiteralStatement(s.toString(), Vocab.SPECIMEN_TO_CATALOG_ID_REL_ID, s.getCatalogID());
                             graph.addStatement(specimen2catalogId);
                         }
                     }
