@@ -5,6 +5,7 @@ public class Vocab {
     public static final String PUB_HAS_DATE = "dc:date";
     public static final String PUB_HAS_ABSTRACT = "dc:abstract";
     public static final String PUB_HAS_CITATION = "dc:bibliographicCitation";
+    public static final String PUB_HAS_DOI = "dc:identifier";
     public static final String PUBLICATION_TYPE_ID = "PHENOSCAPE:Publication";
     public static final String PUB_NAMESPACE = "phenoscape_pub";
     public static final String DATASET_TYPE_ID = "cdao:CharacterStateDataMatrix";

@@ -97,6 +97,11 @@ public class OBDPublicationBridge {
             final NodeAlias fullCitationAsSynonym = new NodeAlias(pubID, fullCitation);
             fullCitationAsSynonym.setScope(Scope.EXACT);
             pubGraph.addStatement(fullCitationAsSynonym);
+            final Element doiElement = record.getChild("electronic-resource-num");
+            if (doiElement != null) {
+                final String doi = doiElement.getValue().trim();
+                pubGraph.addLiteralStatement(pubNode, Vocab.PUB_HAS_DOI, doi);
+            }
             log().debug("Adding pub: " + pubNode);
             pubGraph.addNode(pubNode);
         } else {
