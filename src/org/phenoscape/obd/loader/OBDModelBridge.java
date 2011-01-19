@@ -9,12 +9,12 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.obd.model.CompositionalDescription;
+import org.obd.model.CompositionalDescription.Predicate;
 import org.obd.model.Graph;
 import org.obd.model.LinkStatement;
 import org.obd.model.LiteralStatement;
 import org.obd.model.Node;
 import org.obd.model.Statement;
-import org.obd.model.CompositionalDescription.Predicate;
 import org.obo.datamodel.OBOClass;
 import org.phenoscape.model.Character;
 import org.phenoscape.model.DataSet;
@@ -61,7 +61,7 @@ public class OBDModelBridge {
     }
 
     public Graph translate(DataSet dataset) throws IOException {
-        String dsId = UUID.randomUUID().toString();
+        String dsID = UUID.randomUUID().toString();
         graph = new Graph();
         phenotypes = new HashSet<LinkStatement>();
         characterIdMap = new HashMap<Character, String>();
@@ -70,13 +70,13 @@ public class OBDModelBridge {
         taxonIDToOTUID = new HashMap<Taxon, String>(); 
         phenotypeIdMap = new HashMap<Phenotype, String>();
         // Dataset metadata
-        this.graph.addNode(OBDUtil.createInstanceNode(dsId, Vocab.DATASET_TYPE_ID));
+        this.graph.addNode(OBDUtil.createInstanceNode(dsID, Vocab.DATASET_TYPE_ID));
         final String curators = dataset.getCurators();
-        LinkStatement ds2p = new LinkStatement(dsId, Vocab.HAS_PUB_REL_ID, dataset.getPublication());
+        LinkStatement ds2p = new LinkStatement(dsID, Vocab.HAS_PUB_REL_ID, dataset.getPublication());
         graph.addStatement(ds2p);
 
         if (curators != null) {
-            LiteralStatement ds2curators = new LiteralStatement(dsId, Vocab.HAS_CURATORS_REL_ID, curators);
+            LiteralStatement ds2curators = new LiteralStatement(dsID, Vocab.HAS_CURATORS_REL_ID, curators);
             graph.addStatement(ds2curators);
         }
         for (Taxon taxon : dataset.getTaxa()) {
@@ -86,8 +86,8 @@ public class OBDModelBridge {
                 Node taxonNode = translate(taxon);
                 if (taxonNode.getId() != null) {
                     taxonIdMap.put(taxon, taxonNode.getId());
-                    final String otuId = UUID.randomUUID().toString();
-                    final Node otuNode = OBDUtil.createInstanceNode(otuId, Vocab.OTU_TYPE_ID);
+                    final String otuID = UUID.randomUUID().toString();
+                    final Node otuNode = OBDUtil.createInstanceNode(otuID, Vocab.OTU_TYPE_ID);
                     this.taxonIDToOTUID.put(taxon, otuNode.getId());
                     if (!StringUtils.isBlank(taxon.getPublicationName())) {
                         otuNode.setLabel(taxon.getPublicationName());
@@ -96,18 +96,22 @@ public class OBDModelBridge {
                     }
                     this.graph.addNode(otuNode);
                     // link dataset to taxa
-                    LinkStatement ds2otu = new LinkStatement(dsId, Vocab.HAS_TU_REL_ID, otuNode.getId());
-                    graph.addStatement(ds2otu);
+                    LinkStatement ds2otu = new LinkStatement(dsID, Vocab.HAS_TU_REL_ID, otuNode.getId());
+                    this.graph.addStatement(ds2otu);
                     //link otu to taxon
-                    LinkStatement otu2t = new LinkStatement(otuId, Vocab.REFERS_TO_TAXON_REL_ID, taxonNode.getId());
-                    graph.addStatement(otu2t);
+                    LinkStatement otu2t = new LinkStatement(otuID, Vocab.REFERS_TO_TAXON_REL_ID, taxonNode.getId());
+                    this.graph.addStatement(otu2t);
+                    if (StringUtils.isNotBlank(taxon.getComment())) {
+                        LiteralStatement taxonCommentStatement = new LiteralStatement(otuID, Vocab.HAS_COMMENT_REL_ID, taxon.getComment());
+                        this.graph.addStatement(taxonCommentStatement);
+                    }
                     //link otu to specimens
                     for (Specimen s : taxon.getSpecimens()) {
                         if ((s.getCollectionCode() != null) && (!StringUtils.isBlank(s.getCatalogID()))) {
                             //FIXME should not be relying on toString of Specimen to generate a useful ID for OBD
                             final Node specimenNode = OBDUtil.createInstanceNode(s.toString(), Vocab.SPECIMEN_TYPE_ID);
                             this.graph.addNode(specimenNode);
-                            LinkStatement otu2specimen = new LinkStatement(otuId, Vocab.HAS_SPECIMEN_REL_ID, specimenNode.getId());
+                            LinkStatement otu2specimen = new LinkStatement(otuID, Vocab.HAS_SPECIMEN_REL_ID, specimenNode.getId());
                             graph.addStatement(otu2specimen);
                             //link specimen to collection 
                             LinkStatement specimen2collection = new LinkStatement(s.toString(), Vocab.SPECIMEN_TO_COLLECTION_REL_ID, 
@@ -134,13 +138,13 @@ public class OBDModelBridge {
             String charComment = character.getComment();
             if (charComment != null) {
                 LiteralStatement chCommentStmt = new LiteralStatement(characterNode.getId(), Vocab.HAS_COMMENT_REL_ID, charComment);
-                characterNode.addStatement(chCommentStmt);
+                this.graph.addStatement(chCommentStmt);
             }
             LiteralStatement chNumberStmt = new LiteralStatement(characterNode.getId(), Vocab.HAS_NUMBER_REL_ID, charNumber + "");
-            characterNode.addStatement(chNumberStmt);
+            this.graph.addStatement(chNumberStmt);
             characterIdMap.put(character, characterID);
-            LinkStatement datasetToCharacterLink = new LinkStatement(dsId, Vocab.HAS_CHARACTER_REL_ID, characterID);
-            graph.addStatement(datasetToCharacterLink);
+            LinkStatement datasetToCharacterLink = new LinkStatement(dsID, Vocab.HAS_CHARACTER_REL_ID, characterID);
+            this.graph.addStatement(datasetToCharacterLink);
 
             for (State state : character.getStates()) {
                 final String stateID = UUID.randomUUID().toString();
@@ -149,20 +153,19 @@ public class OBDModelBridge {
                 stateNode.setLabel(state.getLabel());
                 stateNode.setId(stateID);
                 String stateComment = state.getComment();
-                if(stateComment != null) {
+                if (stateComment != null) {
                     LiteralStatement stCommStmt = new LiteralStatement(stateNode.getId(), Vocab.HAS_COMMENT_REL_ID, stateComment);
                     stateNode.addStatement(stCommStmt);
                 }
                 stateIdMap.put(state, stateID);
                 LinkStatement characterToStateLink = new LinkStatement(characterID, Vocab.HAS_STATE_REL_ID, stateID);
-                graph.addStatement(characterToStateLink);
+                this.graph.addStatement(characterToStateLink);
                 for (Phenotype p : state.getPhenotypes()) {
                     CompositionalDescription phenotypeNode = translate(p);
                     if (phenotypeNode != null && phenotypeNode.getId() != null && phenotypeNode.getId().length() > 0) {
                         phenotypeIdMap.put(p, phenotypeNode.getId());
-                        LinkStatement s2p = new LinkStatement(stateID,
-                                Vocab.HAS_PHENOTYPE_REL_ID, phenotypeNode.getId());
-                        graph.addStatement(s2p);
+                        LinkStatement s2p = new LinkStatement(stateID, Vocab.HAS_PHENOTYPE_REL_ID, phenotypeNode.getId());
+                        this.graph.addStatement(s2p);
                     }
                 }
             }
@@ -183,7 +186,7 @@ public class OBDModelBridge {
                         annotationLink.setNodeId(taxonIdMap.get(taxon));
                         annotationLink.setTargetId(phenotypeIdMap.get(p));
                         annotationLink.setRelationId(Vocab.TAXON_PHENOTYPE_REL_ID);
-                        annotationLink.addSubLinkStatement(Vocab.POSITED_BY_REL_ID, dsId);
+                        annotationLink.addSubLinkStatement(Vocab.POSITED_BY_REL_ID, dsID);
                         annotationLink.addSubLinkStatement(Vocab.ANNOTATION_TO_OTU_REL_ID, this.taxonIDToOTUID.get(taxon));
                         // link description of biology back to data
                         final Node cellNode = OBDUtil.createInstanceNode(UUID.randomUUID().toString(), Vocab.CELL_TYPE_ID);
