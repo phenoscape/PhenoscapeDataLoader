@@ -52,7 +52,7 @@ public class AttributePhenotypesLoader {
             for (IdentifiedObject io : this.session.getObjects()) {
                 if (io instanceof OBOClass) {
                     final OBOClass term = (OBOClass)io;
-                    if (term.getNamespace().getID().equals("teleost_anatomy")) {
+                    if ((term.getNamespace() != null) && (term.getNamespace().getID().equals("teleost_anatomy"))) {
                         final CompositionalDescription phenotype = this.createPhenotype(term, attribute);
                         log().info("Adding phenotype: " + phenotype);
                         graph.addStatements(phenotype);
