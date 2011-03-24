@@ -30,6 +30,8 @@ public class SolrPhenotypeLoader {
     public static final String DB_USER = "db-user";
     /** The db-password system property should contain the database password. */
     public static final String DB_PASSWORD = "db-password";
+    /** The solr-url system property should contain the url for the Solr web application. */
+    public static final String SOLR_URL = "solr-url";
     private static final String PHENOTYPES_QUERY = "SELECT * FROM phenotype";
     private static final String TAXA_QUERY = "SELECT DISTINCT taxon.node_id AS taxon_node_id, taxon.uid AS taxon_uid, EXISTS (SELECT 1 FROM asserted_taxon_annotation WHERE asserted_taxon_annotation.annotation_id = taxon_annotation.annotation_id) AS some_is_asserted FROM taxon_annotation JOIN link taxon_is_a ON (taxon_is_a.predicate_id = (SELECT node.node_id FROM node WHERE node.uid = 'OBO_REL:is_a') AND taxon_is_a.node_id = taxon_annotation.taxon_node_id) JOIN node taxon ON (taxon.node_id = taxon_is_a.object_id) WHERE taxon_annotation.phenotype_node_id = ?";
     private static final String ENTITIES_QUERY = "SELECT DISTINCT entity.node_id AS entity_node_id, entity.uid AS entity_uid, phenotype.node_id AS phenotype_node_id, EXISTS (SELECT 1 FROM link WHERE link.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in') AND link.node_id = phenotype.node_id AND link.object_id = phenotype_inheres_in_part_of.object_id) AS strict_inheres_in FROM phenotype JOIN link phenotype_inheres_in_part_of ON (phenotype_inheres_in_part_of.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in_part_of') AND phenotype_inheres_in_part_of.node_id = phenotype.node_id) JOIN node entity ON (entity.node_id = phenotype_inheres_in_part_of.object_id) WHERE phenotype.node_id = ?";
@@ -63,7 +65,6 @@ public class SolrPhenotypeLoader {
             this.solr.add(doc);
             this.solr.commit();
         }
-        System.exit(0);
     }
     
     private void clearSolrIndex() throws SolrServerException, IOException {
@@ -129,8 +130,7 @@ public class SolrPhenotypeLoader {
     }
     
     private SolrServer getSolrServer() throws MalformedURLException {
-        final String solrURL = "http://localhost:8983/solr";
-        return new CommonsHttpSolrServer(solrURL);
+        return new CommonsHttpSolrServer(System.getProperty(SOLR_URL));
     }
     
     private Logger log() {
