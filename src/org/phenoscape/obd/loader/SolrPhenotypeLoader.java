@@ -33,7 +33,7 @@ public class SolrPhenotypeLoader {
     private static final String PHENOTYPES_QUERY = "SELECT * FROM phenotype";
     private static final String TAXA_QUERY = "SELECT DISTINCT taxon.node_id AS taxon_node_id, taxon.uid AS taxon_uid, EXISTS (SELECT 1 FROM asserted_taxon_annotation WHERE asserted_taxon_annotation.annotation_id = taxon_annotation.annotation_id) AS some_is_asserted FROM taxon_annotation JOIN link taxon_is_a ON (taxon_is_a.predicate_id = (SELECT node.node_id FROM node WHERE node.uid = 'OBO_REL:is_a') AND taxon_is_a.node_id = taxon_annotation.taxon_node_id) JOIN node taxon ON (taxon.node_id = taxon_is_a.object_id) WHERE taxon_annotation.phenotype_node_id = ?";
     private static final String ENTITIES_QUERY = "SELECT DISTINCT entity.node_id AS entity_node_id, entity.uid AS entity_uid, phenotype.node_id AS phenotype_node_id, EXISTS (SELECT 1 FROM link WHERE link.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in') AND link.node_id = phenotype.node_id AND link.object_id = phenotype_inheres_in_part_of.object_id) AS strict_inheres_in FROM phenotype JOIN link phenotype_inheres_in_part_of ON (phenotype_inheres_in_part_of.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in_part_of') AND phenotype_inheres_in_part_of.node_id = phenotype.node_id) JOIN node entity ON (entity.node_id = phenotype_inheres_in_part_of.object_id) WHERE phenotype.node_id = ?";
-    private static final String QUALITIES_QUERY = "CREATE TABLE phenotype_quality_facet AS SELECT DISTINCT quality.node_id AS quality_node_id, quality.uid AS quality_uid, phenotype.node_id AS phenotype_node_id FROM phenotype JOIN link phenotype_is_a ON (phenotype_is_a.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:is_a') AND phenotype_is_a.node_id = phenotype.node_id) JOIN node quality ON (quality.node_id = phenotype_is_a.object_id) WHERE phenotype.node_id = ?";
+    private static final String QUALITIES_QUERY = "SELECT DISTINCT quality.node_id AS quality_node_id, quality.uid AS quality_uid, phenotype.node_id AS phenotype_node_id FROM phenotype JOIN link phenotype_is_a ON (phenotype_is_a.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:is_a') AND phenotype_is_a.node_id = phenotype.node_id) JOIN node quality ON (quality.node_id = phenotype_is_a.object_id) WHERE phenotype.node_id = ?";
     private static final String RELATED_ENTITIES_QUERY = "SELECT DISTINCT related_entity.node_id AS related_entity_node_id, related_entity.uid AS related_entity_uid, phenotype.node_id AS phenotype_node_id FROM phenotype JOIN link phenotype_towards ON (phenotype_towards.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:towards') AND phenotype_towards.node_id = phenotype.node_id) JOIN node related_entity ON (related_entity.node_id = phenotype_towards.object_id) WHERE phenotype.node_id = ?";
     private Connection connection;
     private SolrServer solr;
@@ -45,7 +45,7 @@ public class SolrPhenotypeLoader {
     public void loadPhenotypeAssociationsIntoSolr() throws SQLException, ClassNotFoundException, IOException, ParserConfigurationException, SAXException, SolrServerException {
         this.connection = this.getConnection();
         this.solr = this.getSolrServer();
-        //this.clearSolrIndex();
+        this.clearSolrIndex();
         final PreparedStatement phenotypesQuery = this.connection.prepareStatement(PHENOTYPES_QUERY);
         this.taxaQuery = this.connection.prepareStatement(TAXA_QUERY);
         this.entitiesQuery = this.connection.prepareStatement(ENTITIES_QUERY);
@@ -72,7 +72,7 @@ public class SolrPhenotypeLoader {
     
     private SolrInputDocument translatePhenotype(int phenotypeNodeID, String phenotypeUID) throws SQLException {
         final SolrInputDocument doc = new SolrInputDocument();
-        //this.addTaxaToPhenotype(phenotypeNodeID, doc);
+        this.addTaxaToPhenotype(phenotypeNodeID, doc);
         this.addEntitiesToPhenotype(phenotypeNodeID, doc);
         this.addQualitiesToPhenotype(phenotypeNodeID, doc);
         this.addRelatedEntitiesToPhenotype(phenotypeNodeID, doc);
