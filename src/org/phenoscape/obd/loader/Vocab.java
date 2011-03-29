@@ -42,4 +42,7 @@ public class Vocab {
     public static final String GENE_NAMESPACE = "zfin_gene";
     public static final String FULL_NAME_SYNONYM_CATEGORY = "FULLNAME";
     public static final String HAS_DBXREF = "oboInOwl:hasDbXref";
+    public static final String GENE_TO_CELLULAR_COMPONENT_REL_ID = "OBO_REL:located_in";
+    public static final String GENE_TO_MOLECULAR_FUNCTION_REL_ID = "OBO_REL:has_function";
+    public static final String GENE_TO_BIOLOGICAL_PROCESS_REL_ID = "OBO_REL:participates_in";
 }
