@@ -43,9 +43,15 @@ public class ZFINGOAnnotationsLoader {
         final Graph graph = new Graph();
         final BufferedReader reader = this.getPublicationsData();
         String line;
+        log().debug("Reading annotations");
         while ((line = reader.readLine()) != null) {
-            graph.addStatement(this.parseAnnotationLine(line));
+            log().trace("Reading line: " + line);
+            final Statement statement = this.parseAnnotationLine(line);
+            if (statement != null) {
+                graph.addStatement(statement);
+            }
         }
+        log().debug("Putting graph into OBD");
         shard.putGraph(graph);
         shard.disconnect();
     }
@@ -78,7 +84,6 @@ public class ZFINGOAnnotationsLoader {
         return (index < items.length) ? items[index].trim() : null;
     }
     
-    @SuppressWarnings("unused")
     private Logger log() {
         return Logger.getLogger(this.getClass());
     }
