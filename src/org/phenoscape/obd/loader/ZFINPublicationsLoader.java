@@ -22,7 +22,7 @@ public class ZFINPublicationsLoader {
     /** The db-password system property should contain the database password. */
     public static final String DB_PASSWORD = "db-password";
     /** The publications-url system property should contain the URL of the ZFIN phenotypes file. */
-    public static final String PUBLICATIONS_URL = "publications-url";
+    public static final String PUBLICATIONS_URL = "zfin-publications-url";
 
     public void loadPublicationsData() throws IOException, SQLException, ClassNotFoundException {
         final OBDSQLShard shard = this.initializeShard();
