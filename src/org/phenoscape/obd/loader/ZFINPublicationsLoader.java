@@ -56,8 +56,7 @@ public class ZFINPublicationsLoader {
         final String year = this.getItem(items, 5);
         final String volume = this.getItem(items, 6); 
         final String pages = this.getItem(items, 7);
-        final Node pubNode = OBDUtil.createInstanceNode(pubID, Vocab.PUBLICATION_TYPE_ID);
-        pubNode.setId(pubID);
+        final Node pubNode = OBDUtil.createInstanceNode("ZFIN:" + pubID, Vocab.PUBLICATION_TYPE_ID);
         pubNode.setLabel(this.createFullCitation(authors, year, title, journal, volume, pages));
         return pubNode;
     }
