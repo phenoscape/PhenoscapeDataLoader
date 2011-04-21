@@ -1,8 +1,10 @@
 package org.phenoscape.obd.loader;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -160,6 +162,7 @@ public class OBDModelBridge {
                 stateIdMap.put(state, stateID);
                 LinkStatement characterToStateLink = new LinkStatement(characterID, Vocab.HAS_STATE_REL_ID, stateID);
                 this.graph.addStatement(characterToStateLink);
+                this.addAllPhenotypes(state, this.createSymmetricPhenotypes(state));
                 for (Phenotype p : state.getPhenotypes()) {
                     CompositionalDescription phenotypeNode = translate(p);
                     if (phenotypeNode != null && phenotypeNode.getId() != null && phenotypeNode.getId().length() > 0) {
@@ -250,6 +253,37 @@ public class OBDModelBridge {
         n.setLabel(taxon.getValidName().getName());
         graph.addNode(n);
         return n;
+    }
+    
+    private List<Phenotype> createSymmetricPhenotypes(State state) {
+        final List<Phenotype> symmetricPhenotypes = new ArrayList<Phenotype>();
+        for (Phenotype phenotype : state.getPhenotypes()) {
+            final OBOClass quality = phenotype.getQuality();
+            final OBOClass entity = phenotype.getEntity();
+            final OBOClass relatedEntity = phenotype.getRelatedEntity();
+            if ((relatedEntity != null) && (entity != null) && (quality != null) && (Vocab.SYMMETRIC_QUALITIES.contains(quality.getID()))) {
+                symmetricPhenotypes.add(this.createSymmetricPhenotype(phenotype));
+            }
+        }
+        return symmetricPhenotypes;
+    }
+    
+    private Phenotype createSymmetricPhenotype(Phenotype phenotype) {
+        final Phenotype symmetricPhenotype = new Phenotype();
+        symmetricPhenotype.setEntity(phenotype.getRelatedEntity());
+        symmetricPhenotype.setQuality(phenotype.getQuality());
+        symmetricPhenotype.setRelatedEntity(phenotype.getEntity());
+        symmetricPhenotype.setCount(phenotype.getCount());
+        symmetricPhenotype.setComment(phenotype.getComment());
+        symmetricPhenotype.setMeasurement(phenotype.getMeasurement());
+        symmetricPhenotype.setUnit(phenotype.getUnit());
+        return symmetricPhenotype;
+    }
+    
+    private void addAllPhenotypes(State state, List<Phenotype> phenotypes) {
+        for (Phenotype phenotype : phenotypes) {
+            state.addPhenotype(phenotype);
+        }
     }
 
 }

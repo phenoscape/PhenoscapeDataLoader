@@ -1,5 +1,8 @@
 package org.phenoscape.obd.loader;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Vocab {
 
     public static final String PUB_HAS_DATE = "dc:date";
@@ -45,4 +48,17 @@ public class Vocab {
     public static final String GENE_TO_CELLULAR_COMPONENT_REL_ID = "OBO_REL:located_in";
     public static final String GENE_TO_MOLECULAR_FUNCTION_REL_ID = "OBO_REL:has_function";
     public static final String GENE_TO_BIOLOGICAL_PROCESS_REL_ID = "OBO_REL:participates_in";
+    
+    public static final String ARTICULATED_WITH = "PATO:0002278";
+    public static final String ASSOCIATED_WITH = "PATO:0001668";
+    public static final String ATTACHED_TO = "PATO:0001667";
+    public static final String DETACHED_FROM = "PATO:0001453";
+    public static final String DISSOCIATED_FROM = "PATO:0001738";
+    public static final String FUSED_WITH = "PATO:0000642";
+    public static final String IN_CONTACT_WITH = "PATO:0001961";
+    public static final String OVERLAP_WITH = "PATO:0001590";
+    public static final String SEPARATED_FROM = "PATO:0001505";
+    public static final String UNFUSED_FROM = "PATO:0000651";
+    public static final List<String> SYMMETRIC_QUALITIES = Arrays.asList(ARTICULATED_WITH, ASSOCIATED_WITH, ATTACHED_TO, DETACHED_FROM, DISSOCIATED_FROM, FUSED_WITH, IN_CONTACT_WITH, OVERLAP_WITH, SEPARATED_FROM, UNFUSED_FROM);
+    
 }
