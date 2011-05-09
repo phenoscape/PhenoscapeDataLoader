@@ -16,11 +16,11 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.bbop.dataadapter.DataAdapterException;
 import org.obd.model.CompositionalDescription;
+import org.obd.model.CompositionalDescription.Predicate;
 import org.obd.model.Graph;
 import org.obd.model.LinkStatement;
 import org.obd.model.Node;
 import org.obd.model.NodeAlias;
-import org.obd.model.CompositionalDescription.Predicate;
 import org.obd.model.NodeAlias.Scope;
 import org.obd.query.Shard;
 import org.obd.query.impl.OBDSQLShard;
@@ -230,21 +230,23 @@ public class ZfinObdBridge {
         return "Not found";
     }
 
-    private CompositionalDescription postComposeTerms(String[] comps){
-        String aggregateEntityId, qualityId, componentEntityId, ab;
+    private CompositionalDescription postComposeTerms(String[] comps) {
+        String aggregateEntityId, qualityId, componentEntityId, ab,dependentEntityID, dependentSubEntityID;
         CompositionalDescription componentAggregateDesc = null;
 
         aggregateEntityId = comps[4];
         qualityId = comps[6];
         componentEntityId = comps[5];
         ab = comps[7];
+        dependentEntityID = comps[8];
+        dependentSubEntityID = comps[9];
 
         if(aggregateEntityId != null){
             aggregateEntityId = replaceZfinEntityWithTaoEntity(aggregateEntityId);
             aggregateEntityId = replaceAlternateId(aggregateEntityId);
         }
 
-        if(componentEntityId != null && componentEntityId.trim().length() > 0 && componentEntityId.matches("[A-Z]+:[0-9]+")){
+        if (componentEntityId != null && componentEntityId.trim().length() > 0 && componentEntityId.matches("[A-Z]+:[0-9]+")){
             componentEntityId = replaceZfinEntityWithTaoEntity(componentEntityId);
             componentEntityId = replaceAlternateId(componentEntityId);
 
@@ -253,45 +255,67 @@ public class ZfinObdBridge {
             componentAggregateDesc.addArgument(relationVocabulary.part_of(), aggregateEntityId);
         }
 
+        if (dependentEntityID != null && dependentEntityID.trim().length() > 0 && dependentEntityID.matches("[A-Z]+:[0-9]+")){
+            dependentEntityID = replaceZfinEntityWithTaoEntity(dependentEntityID);
+            dependentEntityID = replaceAlternateId(dependentEntityID);
+        }
+
+        if (dependentSubEntityID != null && dependentSubEntityID.trim().length() > 0 && dependentSubEntityID.matches("[A-Z]+:[0-9]+")){
+            dependentSubEntityID = replaceZfinEntityWithTaoEntity(dependentSubEntityID);
+            dependentSubEntityID = replaceAlternateId(dependentSubEntityID);
+        }
+
         qualityId = replaceAlternateId(qualityId);
 
-        if(ab != null){
+        if (ab != null) {
             for (String qual : ab.split("/")) {
-                if(qualityId.equals("PATO:0000001")){
+                if (qualityId.equals("PATO:0000001")) {
                     String patoId = replaceDefaultQualityIdWithPatoId(qual);
                     qualityId = patoId;
                 }
             }
         }
 
-        CompositionalDescription desc = new CompositionalDescription(Predicate.INTERSECTION);    	
-        desc.addArgument(qualityId);
-        if(componentAggregateDesc != null)
-            desc.addArgument(relationVocabulary.inheres_in(), componentAggregateDesc);
-        else
-            desc.addArgument(relationVocabulary.inheres_in(), aggregateEntityId);
+        CompositionalDescription phenotypeDescription = new CompositionalDescription(Predicate.INTERSECTION);    	
+        phenotypeDescription.addArgument(qualityId);
+        if (componentAggregateDesc != null) {
+            phenotypeDescription.addArgument(relationVocabulary.inheres_in(), componentAggregateDesc);
+        }
+        else {
+            phenotypeDescription.addArgument(relationVocabulary.inheres_in(), aggregateEntityId);
+        }
+        if (dependentEntityID != null) {
+            if (dependentSubEntityID != null) {
+                final CompositionalDescription dependentEntityComposition = new CompositionalDescription(Predicate.INTERSECTION);
+                dependentEntityComposition.addArgument(dependentSubEntityID);
+                dependentEntityComposition.addArgument(relationVocabulary.part_of(), dependentEntityID);
+                dependentEntityComposition.setId(dependentEntityComposition.generateId());
+                phenotypeDescription.addArgument(relationVocabulary.towards(), dependentEntityComposition);
+            } else {
+                phenotypeDescription.addArgument(relationVocabulary.towards(), dependentEntityID);
+            }
+        }
+        phenotypeDescription.setId(phenotypeDescription.generateId());
 
-        desc.setId(desc.generateId());
-
-        return desc;
+        return phenotypeDescription;
     }
 
-    private String replaceZfinEntityWithTaoEntity(String zfinEntity){
+    private String replaceZfinEntityWithTaoEntity(String zfinEntity) {
         String taoEntity = getEquivalentTAOID(zfinEntity);
         String target = taoEntity.equals("Not found")? zfinEntity : taoEntity;
         return target;
     }
 
-    private String replaceAlternateId(String alternateId){
+    private String replaceAlternateId(String alternateId) {
         String id = alternateId;
-        if(id2AlternateIdMap.containsKey(alternateId)){
+        if (id2AlternateIdMap.containsKey(alternateId)) {
             log().info("Replacing alternate ID: " + alternateId);
             id = id2AlternateIdMap.get(alternateId);
         }
         return id;
     }
 
-    private String replaceDefaultQualityIdWithPatoId(String qual){
+    private String replaceDefaultQualityIdWithPatoId(String qual) {
         String patoId;
         if (qual.equals("normal"))
             patoId = "PATO:0000461";
@@ -304,13 +328,13 @@ public class ZfinObdBridge {
         return patoId;
     }
 
-    private void mapGenotypeToGene() throws IOException{
+    private void mapGenotypeToGene() throws IOException {
         String lineFromGenotypeToPhenotypeFile;
         String genotypeId, geneId = null;
         URL genotypeURL = new URL(System.getProperty(GENOTYPE_URL));
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(genotypeURL.openStream()));
-        while((lineFromGenotypeToPhenotypeFile = reader.readLine()) != null){
+        while ((lineFromGenotypeToPhenotypeFile = reader.readLine()) != null) {
             String[] comps = lineFromGenotypeToPhenotypeFile.split("\\t");
             genotypeId = normalizetoZfin(comps[0]);
             if(comps.length > 9){
@@ -322,7 +346,7 @@ public class ZfinObdBridge {
         reader.close();
     }
 
-    private void mapGenotypeToGeneViaMissingMarkers() throws IOException{
+    private void mapGenotypeToGeneViaMissingMarkers() throws IOException {
         String lineFromFile;
         String genotypeId, geneId;
         URL missingMarkersURL = new URL(System.getProperty(MISSING_MARKERS_URL));
@@ -353,8 +377,8 @@ public class ZfinObdBridge {
             }
             genotypeId = pComps[0];
             genotype = pComps[1];
-            publicationID = pComps[8];
-            environmentId = pComps[9];
+            publicationID = pComps[10];
+            environmentId = pComps[11];
 
             final boolean isMorpholino;
             if (genotype.equals(WILD_TYPE)) {
