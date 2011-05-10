@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bbop.dataadapter.DataAdapterException;
 import org.obd.model.CompositionalDescription;
@@ -230,37 +231,33 @@ public class ZfinObdBridge {
         return "Not found";
     }
 
-    private CompositionalDescription postComposeTerms(String[] comps) {
+    private CompositionalDescription createPhenotype(String[] dataColumns) {
         String aggregateEntityId, qualityId, componentEntityId, ab,dependentEntityID, dependentSubEntityID;
         CompositionalDescription componentAggregateDesc = null;
 
-        aggregateEntityId = comps[4];
-        qualityId = comps[6];
-        componentEntityId = comps[5];
-        ab = comps[7];
-        dependentEntityID = comps[8];
-        dependentSubEntityID = comps[9];
+        aggregateEntityId = StringUtils.trimToNull(dataColumns[4]);
+        qualityId = StringUtils.trimToNull(dataColumns[6]);
+        componentEntityId = StringUtils.trimToNull(dataColumns[5]);
+        ab = StringUtils.trimToNull(dataColumns[7]);
+        dependentEntityID = StringUtils.trimToNull(dataColumns[8]);
+        dependentSubEntityID = StringUtils.trimToNull(dataColumns[9]);
 
-        if(aggregateEntityId != null){
+        if (aggregateEntityId != null) {
             aggregateEntityId = replaceZfinEntityWithTaoEntity(aggregateEntityId);
             aggregateEntityId = replaceAlternateId(aggregateEntityId);
         }
-
-        if (componentEntityId != null && componentEntityId.trim().length() > 0 && componentEntityId.matches("[A-Z]+:[0-9]+")){
+        if (componentEntityId != null && componentEntityId.matches("[A-Z]+:[0-9]+")) {
             componentEntityId = replaceZfinEntityWithTaoEntity(componentEntityId);
             componentEntityId = replaceAlternateId(componentEntityId);
-
             componentAggregateDesc = new CompositionalDescription(Predicate.INTERSECTION);
             componentAggregateDesc.addArgument(componentEntityId);
             componentAggregateDesc.addArgument(relationVocabulary.part_of(), aggregateEntityId);
         }
-
-        if (dependentEntityID != null && dependentEntityID.trim().length() > 0 && dependentEntityID.matches("[A-Z]+:[0-9]+")){
+        if (dependentEntityID != null && dependentEntityID.matches("[A-Z]+:[0-9]+")) {
             dependentEntityID = replaceZfinEntityWithTaoEntity(dependentEntityID);
             dependentEntityID = replaceAlternateId(dependentEntityID);
         }
-
-        if (dependentSubEntityID != null && dependentSubEntityID.trim().length() > 0 && dependentSubEntityID.matches("[A-Z]+:[0-9]+")){
+        if (dependentSubEntityID != null && dependentSubEntityID.matches("[A-Z]+:[0-9]+")){
             dependentSubEntityID = replaceZfinEntityWithTaoEntity(dependentSubEntityID);
             dependentSubEntityID = replaceAlternateId(dependentSubEntityID);
         }
@@ -276,7 +273,7 @@ public class ZfinObdBridge {
             }
         }
 
-        CompositionalDescription phenotypeDescription = new CompositionalDescription(Predicate.INTERSECTION);    	
+        final CompositionalDescription phenotypeDescription = new CompositionalDescription(Predicate.INTERSECTION);    	
         phenotypeDescription.addArgument(qualityId);
         if (componentAggregateDesc != null) {
             phenotypeDescription.addArgument(relationVocabulary.inheres_in(), componentAggregateDesc);
@@ -296,7 +293,6 @@ public class ZfinObdBridge {
             }
         }
         phenotypeDescription.setId(phenotypeDescription.generateId());
-
         return phenotypeDescription;
     }
 
@@ -370,15 +366,15 @@ public class ZfinObdBridge {
         String phenoFileLine;
         while ((phenoFileLine = br1.readLine()) != null) {
             String genotypeId, genotype, publicationID, environmentId, geneId = null; 
-            String[] pComps = phenoFileLine.split("\\t");
-            if(pComps.length < 10){ 
+            String[] columns = phenoFileLine.split("\\t");
+            if(columns.length < 10){ 
                 log().info("Skipping line because of inadequate number of tab delimited components: " + phenoFileLine);
                 continue;
             }
-            genotypeId = pComps[0];
-            genotype = pComps[1];
-            publicationID = pComps[10];
-            environmentId = pComps[11];
+            genotypeId = columns[0];
+            genotype = columns[1];
+            publicationID = columns[10];
+            environmentId = columns[11];
 
             final boolean isMorpholino;
             if (genotype.equals(WILD_TYPE)) {
@@ -392,10 +388,8 @@ public class ZfinObdBridge {
                 geneId = this.genotypeToGeneMap.get(genotypeId);
             }
             if (geneId != null && genotypeId != null) {
-                final CompositionalDescription cd = this.postComposeTerms(pComps);
-                final String phenotypeID = cd.generateId();
-                cd.setId(phenotypeID);
-                graph.addStatements(cd);
+                final CompositionalDescription phenotype = this.createPhenotype(columns);
+                graph.addStatements(phenotype);
                 final Node geneNode = OBDUtil.createInstanceNode(geneId, Vocab.GENE_TYPE_ID);
                 geneNode.setSourceId(Vocab.GENE_NAMESPACE);
                 final String geneName = this.zfinGeneIdToNameMap.get(geneId);
@@ -421,7 +415,7 @@ public class ZfinObdBridge {
                 if (genotype != null) genotypeNode.setLabel(genotype);
                 graph.addNode(genotypeNode);
                 this.graph.addLinkStatement(genotypeNode, Vocab.GENOTYPE_GENE_REL_ID, geneId);
-                final LinkStatement annotation = new LinkStatement(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenotypeID);
+                final LinkStatement annotation = new LinkStatement(genotypeId, Vocab.GENOTYPE_PHENOTYPE_REL_ID, phenotype.getId());
                 if (publicationID != null) {
                     annotation.addSubLinkStatement(Vocab.POSITED_BY_REL_ID, publicationID);  
                 } else {
