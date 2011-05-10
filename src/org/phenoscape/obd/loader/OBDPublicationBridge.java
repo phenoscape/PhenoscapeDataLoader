@@ -43,7 +43,7 @@ public class OBDPublicationBridge {
         if (accessionNumElement != null) {
             final String pubID = accessionNumElement.getValue().trim();
             final Node pubNode = OBDUtil.createInstanceNode(pubID, Vocab.PUBLICATION_TYPE_ID);
-            pubNode.setSourceId(Vocab.PUB_NAMESPACE);
+            pubNode.setSourceId(Vocab.PHENOSCAPE_PUB_NAMESPACE);
             final Element yearElement = record.getChild("dates").getChild("year");
             final String year;
             if (yearElement != null) {

@@ -10,7 +10,8 @@ public class Vocab {
     public static final String PUB_HAS_CITATION = "dc:bibliographicCitation";
     public static final String PUB_HAS_DOI = "dc:identifier";
     public static final String PUBLICATION_TYPE_ID = "PHENOSCAPE:Publication";
-    public static final String PUB_NAMESPACE = "phenoscape_pub";
+    public static final String PHENOSCAPE_PUB_NAMESPACE = "phenoscape_pub";
+    public static final String ZFIN_PUB_NAMESPACE = "zfin_pub";
     public static final String DATASET_TYPE_ID = "cdao:CharacterStateDataMatrix";
     public static final String STATE_TYPE_ID = "cdao:CharacterStateDomain";
     public static final String CELL_TYPE_ID = "cdao:CharacterStateDatum";
