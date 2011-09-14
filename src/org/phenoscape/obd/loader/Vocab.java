@@ -49,6 +49,7 @@ public class Vocab {
     public static final String GENE_TO_CELLULAR_COMPONENT_REL_ID = "OBO_REL:located_in";
     public static final String GENE_TO_MOLECULAR_FUNCTION_REL_ID = "OBO_REL:has_function";
     public static final String GENE_TO_BIOLOGICAL_PROCESS_REL_ID = "OBO_REL:participates_in";
+    public static final String PATO_ABSENT = "PATO:0000462";
     
     public static final String ARTICULATED_WITH = "PATO:0002278";
     public static final String ASSOCIATED_WITH = "PATO:0001668";
