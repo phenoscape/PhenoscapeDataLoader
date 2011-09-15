@@ -41,11 +41,11 @@ public class AbsentPhenotypesLoader {
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        final AttributePhenotypesLoader loader = new AttributePhenotypesLoader();
-        loader.loadAttributePhenotypes();
+        final AbsentPhenotypesLoader loader = new AbsentPhenotypesLoader();
+        loader.loadAbsentPhenotypes();
     }
 
-    public void loadAttributePhenotypes() {
+    public void loadAbsentPhenotypes() {
         final Graph graph = new Graph();
         final OBOClass absent = (OBOClass)(this.session.getObject(Vocab.PATO_ABSENT));
         for (IdentifiedObject io : this.session.getObjects()) {
@@ -61,9 +61,9 @@ public class AbsentPhenotypesLoader {
         this.shard.putGraph(graph);
     }
 
-    private CompositionalDescription createPhenotype(OBOClass entity, OBOClass attribute) {
+    private CompositionalDescription createPhenotype(OBOClass entity, OBOClass quality) {
         final CompositionalDescription phenotypeNode = new CompositionalDescription(Predicate.INTERSECTION);
-        phenotypeNode.addArgument(OBDUtil.translateOBOClass(attribute));
+        phenotypeNode.addArgument(OBDUtil.translateOBOClass(quality));
         // check to avoid a NullPointerException
         if (entity.getParents() != null) {
             phenotypeNode.addArgument((new RelationVocabulary()).inheres_in(), OBDUtil.translateOBOClass(entity));
