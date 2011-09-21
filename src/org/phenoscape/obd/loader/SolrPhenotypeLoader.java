@@ -173,6 +173,7 @@ public class SolrPhenotypeLoader {
 //        for (Entry<Object, Object> entry : properties.entrySet()) {
 //            System.setProperty(entry.getKey().toString(), entry.getValue().toString());
 //        }
+        
         final SolrPhenotypeLoader loader = new SolrPhenotypeLoader();
         loader.loadPhenotypeAssociationsIntoSolr();
     }
