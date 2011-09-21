@@ -48,7 +48,6 @@ public class SolrPhenotypeLoader {
     public void loadPhenotypeAssociationsIntoSolr() throws SQLException, ClassNotFoundException, IOException, ParserConfigurationException, SAXException, SolrServerException {
         this.connection = this.getConnection();
         this.solr = this.getSolrServer();
-        this.clearSolrIndex();
         final PreparedStatement phenotypesQuery = this.connection.prepareStatement(PHENOTYPES_QUERY);
         this.taxaQuery = this.connection.prepareStatement(TAXA_QUERY);
         this.entitiesQuery = this.connection.prepareStatement(ENTITIES_QUERY);
@@ -68,10 +67,6 @@ public class SolrPhenotypeLoader {
             this.solr.add(doc);
             this.solr.commit();
         }
-    }
-    
-    private void clearSolrIndex() throws SolrServerException, IOException {
-        this.solr.deleteByQuery("*:*");
     }
     
     private SolrInputDocument translatePhenotype(int phenotypeNodeID, String phenotypeUID) throws SQLException {
