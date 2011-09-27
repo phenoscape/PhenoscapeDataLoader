@@ -51,8 +51,8 @@ public class SolrPhenotypeAnnotationLoader {
             log().debug("Processing annotation " + counter);
             final SolrInputDocument doc = this.translateAnnotation(annotationsResult);
             this.solr.add(doc);
-            this.solr.commit();
         }
+        this.solr.commit();
     }
 
     private SolrInputDocument translateAnnotation(ResultSet annotationsResult) throws SQLException {
@@ -89,12 +89,12 @@ public class SolrPhenotypeAnnotationLoader {
      * @throws SolrServerException 
      */
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SolrServerException {
-        //        Logger.getRootLogger().setLevel(Level.ALL);
-        //        final Properties properties = new Properties();
-        //        properties.load(SolrPhenotypeLoader.class.getResourceAsStream("connection.properties"));
-        //        for (Entry<Object, Object> entry : properties.entrySet()) {
-        //            System.setProperty(entry.getKey().toString(), entry.getValue().toString());
-        //        }
+        //                Logger.getRootLogger().setLevel(Level.ALL);
+        //                final Properties properties = new Properties();
+        //                properties.load(SolrPhenotypeLoader.class.getResourceAsStream("connection.properties"));
+        //                for (Entry<Object, Object> entry : properties.entrySet()) {
+        //                    System.setProperty(entry.getKey().toString(), entry.getValue().toString());
+        //                }
 
         final SolrPhenotypeAnnotationLoader loader = new SolrPhenotypeAnnotationLoader();
         loader.loadPhenotypeAnnotationsIntoSolr();

@@ -65,10 +65,10 @@ public class SolrPhenotypeLoader {
             final SolrInputDocument doc = this.translatePhenotype(phenotypeNodeID, phenotypeUID);
             doc.addField("id", phenotypeUID);
             this.solr.add(doc);
-            this.solr.commit();
         }
+        this.solr.commit();
     }
-    
+
     private SolrInputDocument translatePhenotype(int phenotypeNodeID, String phenotypeUID) throws SQLException {
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("type", "phenotype");
@@ -79,7 +79,7 @@ public class SolrPhenotypeLoader {
         this.addGenesToPhenotype(phenotypeNodeID, doc);
         return doc;
     }
-    
+
     private void addTaxaToPhenotype(int phenotypeNodeID, SolrInputDocument doc) throws SQLException {
         this.taxaQuery.setInt(1, phenotypeNodeID);
         final ResultSet result = this.taxaQuery.executeQuery();
@@ -92,7 +92,7 @@ public class SolrPhenotypeLoader {
             }
         }
     }
-    
+
     private void addEntitiesToPhenotype(int phenotypeNodeID, SolrInputDocument doc) throws SQLException {
         this.entitiesQuery.setInt(1, phenotypeNodeID);
         final ResultSet result = this.entitiesQuery.executeQuery();
@@ -105,7 +105,7 @@ public class SolrPhenotypeLoader {
             }
         }
     }
-    
+
     private void addQualitiesToPhenotype(int phenotypeNodeID, SolrInputDocument doc) throws SQLException {
         this.qualitiesQuery.setInt(1, phenotypeNodeID);
         final ResultSet result = this.qualitiesQuery.executeQuery();
@@ -114,7 +114,7 @@ public class SolrPhenotypeLoader {
             doc.addField("quality", qualityUID);
         }
     }
-    
+
     private void addRelatedEntitiesToPhenotype(int phenotypeNodeID, SolrInputDocument doc) throws SQLException {
         this.relatedEntitiesQuery.setInt(1, phenotypeNodeID);
         final ResultSet result = this.relatedEntitiesQuery.executeQuery();
@@ -123,7 +123,7 @@ public class SolrPhenotypeLoader {
             doc.addField("related_entity", relatedEntityUID);
         }
     }
-    
+
     private void addGenesToPhenotype(int phenotypeNodeID, SolrInputDocument doc) throws SQLException {
         this.genesQuery.setInt(1, phenotypeNodeID);
         final ResultSet genesResult = this.genesQuery.executeQuery();
@@ -143,11 +143,11 @@ public class SolrPhenotypeLoader {
         Class.forName("org.postgresql.Driver");
         return DriverManager.getConnection("jdbc:postgresql://" + System.getProperty(DB_HOST) + "/" + System.getProperty(DB_NAME), System.getProperty(DB_USER), System.getProperty(DB_PASSWORD));
     }
-    
+
     private SolrServer getSolrServer() throws MalformedURLException {
         return new CommonsHttpSolrServer(System.getProperty(SOLR_URL));
     }
-    
+
     private Logger log() {
         return Logger.getLogger(this.getClass());
     }
@@ -162,13 +162,13 @@ public class SolrPhenotypeLoader {
      * @throws SolrServerException 
      */
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SolrServerException {
-//        Logger.getRootLogger().setLevel(Level.ALL);
-//        final Properties properties = new Properties();
-//        properties.load(SolrPhenotypeLoader.class.getResourceAsStream("connection.properties"));
-//        for (Entry<Object, Object> entry : properties.entrySet()) {
-//            System.setProperty(entry.getKey().toString(), entry.getValue().toString());
-//        }
-        
+        //        Logger.getRootLogger().setLevel(Level.ALL);
+        //        final Properties properties = new Properties();
+        //        properties.load(SolrPhenotypeLoader.class.getResourceAsStream("connection.properties"));
+        //        for (Entry<Object, Object> entry : properties.entrySet()) {
+        //            System.setProperty(entry.getKey().toString(), entry.getValue().toString());
+        //        }
+
         final SolrPhenotypeLoader loader = new SolrPhenotypeLoader();
         loader.loadPhenotypeAssociationsIntoSolr();
     }
