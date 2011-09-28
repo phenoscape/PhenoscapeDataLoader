@@ -52,8 +52,10 @@ public class SolrPhenotypeAnnotationLoader {
 
     private SolrInputDocument translateAnnotation(ResultSet annotationsResult) throws SQLException {
         final SolrInputDocument doc = new SolrInputDocument();
+        final String taxonUID = annotationsResult.getString("taxon_uid");
+        final String phenotypeUID = annotationsResult.getString("phenotype_uid");
         doc.addField("type", "taxon_phenotype_annotation");
-        doc.addField("id", "taxon_annotation_" + annotationsResult.getInt("annotation_id"));
+        doc.addField("id", getAnnotationID(taxonUID, phenotypeUID));
         doc.addField("asserted", annotationsResult.getBoolean("is_asserted"));
         doc.addField("phenotype", annotationsResult.getString("phenotype_uid"));
         doc.addField("direct_taxon", annotationsResult.getString("taxon_uid"));
@@ -66,6 +68,10 @@ public class SolrPhenotypeAnnotationLoader {
         doc.addField("direct_related_entity", annotationsResult.getString("related_entity_uid"));
         doc.addField("direct_related_entity_label", annotationsResult.getString("related_entity_label"));
         return doc;
+    }
+    
+    public static String getAnnotationID(String taxonUID, String phenotypeUID) {
+        return "taxon_annotation_" + taxonUID + "#" + phenotypeUID;
     }
 
     private Connection getConnection() throws SQLException, ClassNotFoundException {
