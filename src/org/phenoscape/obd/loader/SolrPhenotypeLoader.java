@@ -7,12 +7,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map.Entry;
-import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -67,6 +64,13 @@ public class SolrPhenotypeLoader {
             log().debug("Processing phenotype " + counter + ": " + phenotypeUID);
             final SolrInputDocument doc = this.translatePhenotype(phenotypeNodeID, phenotypeUID);
             doc.addField("id", phenotypeUID);
+            doc.addField("type", "phenotype");
+            doc.addField("direct_entity", phenotypesResult.getString("entity_uid"));
+            doc.addField("direct_entity_label", phenotypesResult.getString("entity_label"));
+            doc.addField("direct_quality", phenotypesResult.getString("quality_uid"));
+            doc.addField("direct_quality_label", phenotypesResult.getString("quality_label"));
+            doc.addField("direct_related_entity", phenotypesResult.getString("related_entity_uid"));
+            doc.addField("direct_related_entity_label", phenotypesResult.getString("related_entity_label"));
             this.solr.add(doc);
         }
         this.solr.commit();
@@ -74,7 +78,6 @@ public class SolrPhenotypeLoader {
 
     private SolrInputDocument translatePhenotype(int phenotypeNodeID, String phenotypeUID) throws SQLException {
         final SolrInputDocument doc = new SolrInputDocument();
-        doc.addField("type", "phenotype");
         this.addTaxaToPhenotype(phenotypeNodeID, doc);
         this.addEntitiesToPhenotype(phenotypeNodeID, doc);
         this.addQualitiesToPhenotype(phenotypeNodeID, doc);
