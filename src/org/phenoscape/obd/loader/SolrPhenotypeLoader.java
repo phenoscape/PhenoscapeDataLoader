@@ -7,9 +7,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -162,12 +165,12 @@ public class SolrPhenotypeLoader {
      * @throws SolrServerException 
      */
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException, ParserConfigurationException, SAXException, SolrServerException {
-        //        Logger.getRootLogger().setLevel(Level.ALL);
-        //        final Properties properties = new Properties();
-        //        properties.load(SolrPhenotypeLoader.class.getResourceAsStream("connection.properties"));
-        //        for (Entry<Object, Object> entry : properties.entrySet()) {
-        //            System.setProperty(entry.getKey().toString(), entry.getValue().toString());
-        //        }
+//                Logger.getRootLogger().setLevel(Level.ALL);
+//                final Properties properties = new Properties();
+//                properties.load(SolrPhenotypeLoader.class.getResourceAsStream("connection.properties"));
+//                for (Entry<Object, Object> entry : properties.entrySet()) {
+//                    System.setProperty(entry.getKey().toString(), entry.getValue().toString());
+//                }
 
         final SolrPhenotypeLoader loader = new SolrPhenotypeLoader();
         loader.loadPhenotypeAssociationsIntoSolr();
