@@ -30,7 +30,7 @@ public class SolrPhenotypeAnnotationLoader {
     /** The solr-url system property should contain the url for the Solr web application. */
     public static final String SOLR_URL = "solr-url";
 
-    private static final String ANNOTATIONS_QUERY = "SELECT taxon_annotation.*, phenotype.uid AS phenotype_uid, phenotype.entity_uid, phenotype.entity_label, phenotype.quality_uid, phenotype.quality_label, phenotype.related_entity_uid, phenotype.related_entity_label, taxon.uid AS taxon_uid, taxon.label AS taxon_label, taxon.rank_uid, taxon.is_extinct, EXISTS (SELECT 1 FROM asserted_taxon_annotation WHERE asserted_taxon_annotation.annotation_id = taxon_annotation.annotation_id) AS is_asserted FROM taxon_annotation JOIN phenotype ON (phenotype.node_id = taxon_annotation.phenotype_node_id) JOIN taxon ON (taxon.node_id = taxon_annotation.taxon_node_id)";
+    private static final String ANNOTATIONS_QUERY = "SELECT taxon_annotation.*, phenotype.uid AS phenotype_uid, phenotype.entity_uid, phenotype.entity_label, phenotype.quality_uid, phenotype.quality_label, phenotype.related_entity_uid, phenotype.related_entity_label, taxon.uid AS taxon_uid, taxon.label AS taxon_label, taxon.rank_uid, taxon.is_extinct, EXISTS (SELECT 1 FROM asserted_taxon_annotation WHERE asserted_taxon_annotation.annotation_id = taxon_annotation.annotation_id) AS is_asserted FROM taxon_annotation JOIN phenotype ON (phenotype.node_id = taxon_annotation.phenotype_node_id) JOIN taxon ON (taxon.node_id = taxon_annotation.taxon_node_id) ORDER BY annotation_id LIMIT 10000 OFFSET ?";
 
     private Connection connection;
     private SolrServer solr;
@@ -39,15 +39,24 @@ public class SolrPhenotypeAnnotationLoader {
         this.connection = this.getConnection();
         this.solr = this.getSolrServer();
         final PreparedStatement annotationsQuery = this.connection.prepareStatement(ANNOTATIONS_QUERY);
-        final ResultSet annotationsResult = annotationsQuery.executeQuery();
+        int offset = 0;
+        boolean more = true;
         int counter = 0;
-        while (annotationsResult.next()) {
-            counter++;
-            log().debug("Processing annotation " + counter);
-            final SolrInputDocument doc = this.translateAnnotation(annotationsResult);
-            this.solr.add(doc);
+        while (more) {
+            int iterationCounter = 0;
+            offset += 10000;
+            annotationsQuery.setInt(1, offset);
+            final ResultSet annotationsResult = annotationsQuery.executeQuery();
+            while (annotationsResult.next()) {
+                iterationCounter++;
+                counter++;
+                log().debug("Processing annotation " + counter);
+                final SolrInputDocument doc = this.translateAnnotation(annotationsResult);
+                this.solr.add(doc);
+            }
+            this.solr.commit();
+            if (iterationCounter < 10000) { more = false; }
         }
-        this.solr.commit();
     }
 
     private SolrInputDocument translateAnnotation(ResultSet annotationsResult) throws SQLException {
