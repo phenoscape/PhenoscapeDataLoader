@@ -61,7 +61,7 @@ public class SolrGeneLoader {
         this.phenotypesQuery.setInt(1, geneNodeID);
         final ResultSet result = this.phenotypesQuery.executeQuery();
         while (result.next()) {
-            final String phenotypeUID = result.getString("uid");
+            final String phenotypeUID = result.getString("phenotype_uid");
             doc.addField("phenotype", phenotypeUID);
         }
     }
