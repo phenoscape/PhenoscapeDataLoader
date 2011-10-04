@@ -60,6 +60,7 @@ public class SolrPhenotypeAnnotationLoader {
     }
 
     private SolrInputDocument translateAnnotation(ResultSet annotationsResult) throws SQLException {
+        //FIXME need taxon rank
         final SolrInputDocument doc = new SolrInputDocument();
         final String taxonUID = annotationsResult.getString("taxon_uid");
         final String phenotypeUID = annotationsResult.getString("phenotype_uid");
@@ -70,6 +71,7 @@ public class SolrPhenotypeAnnotationLoader {
         doc.addField("direct_taxon", annotationsResult.getString("taxon_uid"));
         doc.addField("direct_taxon_label", annotationsResult.getString("taxon_label"));
         doc.addField("is_extinct", annotationsResult.getBoolean("is_extinct"));
+        doc.addField("rank", annotationsResult.getString("rank_uid"));
         doc.addField("direct_entity", annotationsResult.getString("entity_uid"));
         doc.addField("direct_entity_label", annotationsResult.getString("entity_label"));
         doc.addField("direct_quality", annotationsResult.getString("quality_uid"));
