@@ -29,7 +29,7 @@ public class SolrGeneAnnotationLoader {
     public static final String DB_PASSWORD = "db-password";
     /** The solr-url system property should contain the url for the Solr web application. */
     public static final String SOLR_URL = "solr-url";
-    private static final String GENE_ANNOTATIONS_QUERY = "SELECT * FROM distinct_gene_annotation";
+    private static final String GENE_ANNOTATIONS_QUERY = "SELECT distinct_gene_annotation.*, entity_label.simple_label AS direct_entity_simple_label, quality_label.simple_label AS direct_quality_simple_label, related_entity_label.simple_label AS direct_related_entity_simple_label FROM distinct_gene_annotation JOIN smart_node_label entity_label ON (smart_node_label.node_id = distinct_gene_annotation.entity_node_id) JOIN smart_node_label quality_label ON (smart_node_label.node_id = distinct_gene_annotation.quality_node_id) JOIN smart_node_label related_entity_label ON (smart_node_label.node_id = distinct_gene_annotation.related_entity_node_id)";
     private static final String ENTITIES_QUERY = "SELECT DISTINCT entity.node_id AS entity_node_id, entity.uid AS entity_uid, phenotype.node_id AS phenotype_node_id, EXISTS (SELECT 1 FROM link WHERE link.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in') AND link.node_id = phenotype.node_id AND link.object_id = phenotype_inheres_in_part_of.object_id) AS strict_inheres_in FROM phenotype JOIN link phenotype_inheres_in_part_of ON (phenotype_inheres_in_part_of.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in_part_of') AND phenotype_inheres_in_part_of.node_id = phenotype.node_id) JOIN node entity ON (entity.node_id = phenotype_inheres_in_part_of.object_id) WHERE phenotype.node_id = ?";
     private static final String QUALITIES_QUERY = "SELECT DISTINCT quality.node_id AS quality_node_id, quality.uid AS quality_uid, phenotype.node_id AS phenotype_node_id FROM phenotype JOIN link phenotype_is_a ON (phenotype_is_a.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:is_a') AND phenotype_is_a.node_id = phenotype.node_id) JOIN node quality ON (quality.node_id = phenotype_is_a.object_id) WHERE phenotype.node_id = ?";
     private static final String RELATED_ENTITIES_QUERY = "SELECT DISTINCT related_entity.node_id AS related_entity_node_id, related_entity.uid AS related_entity_uid, phenotype.node_id AS phenotype_node_id FROM phenotype JOIN link phenotype_towards ON (phenotype_towards.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:towards') AND phenotype_towards.node_id = phenotype.node_id) JOIN node related_entity ON (related_entity.node_id = phenotype_towards.object_id) WHERE phenotype.node_id = ?";
@@ -59,11 +59,11 @@ public class SolrGeneAnnotationLoader {
             doc.addField("direct_gene", geneUID);
             doc.addField("direct_gene_label", annotationsResult.getString("gene_label"));
             doc.addField("direct_entity", annotationsResult.getString("entity_uid"));
-            doc.addField("direct_entity_label", annotationsResult.getString("entity_label"));
+            doc.addField("direct_entity_label", annotationsResult.getString("direct_entity_simple_label"));
             doc.addField("direct_quality", annotationsResult.getString("quality_uid"));
-            doc.addField("direct_quality_label", annotationsResult.getString("quality_label"));
+            doc.addField("direct_quality_label", annotationsResult.getString("direct_quality_simple_label"));
             doc.addField("direct_related_entity", annotationsResult.getString("related_entity_uid"));
-            doc.addField("direct_related_entity_label", annotationsResult.getString("related_entity_label"));
+            doc.addField("direct_related_entity_label", annotationsResult.getString("direct_related_entity_simple_label"));
             final int phenotypeNodeID = annotationsResult.getInt("phenotype_node_id");
             this.addEntitiesToAnnotation(phenotypeNodeID, doc);
             this.addQualitiesToAnnotation(phenotypeNodeID, doc);
