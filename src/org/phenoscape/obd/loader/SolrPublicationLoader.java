@@ -41,7 +41,7 @@ public class SolrPublicationLoader {
     private PreparedStatement phenotypesQuery;
     private PreparedStatement annotationsQuery;
 
-    public void loadTaxaIntoSolr() throws SQLException, ClassNotFoundException, IOException, ParserConfigurationException, SAXException, SolrServerException {
+    public void loadPublicationsIntoSolr() throws SQLException, ClassNotFoundException, IOException, ParserConfigurationException, SAXException, SolrServerException {
         this.connection = this.getConnection();
         this.solr = this.getSolrServer();
         this.taxaQuery = this.connection.prepareStatement(TAXA_QUERY);
@@ -127,7 +127,7 @@ public class SolrPublicationLoader {
 //        }
 
         final SolrPublicationLoader loader = new SolrPublicationLoader();
-        loader.loadTaxaIntoSolr();
+        loader.loadPublicationsIntoSolr();
     }
 
 }
