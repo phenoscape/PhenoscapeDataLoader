@@ -30,7 +30,7 @@ public class SolrPhenotypeAnnotationLoader {
     /** The solr-url system property should contain the url for the Solr web application. */
     public static final String SOLR_URL = "solr-url";
 
-    private static final String ANNOTATIONS_QUERY = "SELECT taxon_annotation.*, phenotype.uid AS phenotype_uid, phenotype.entity_uid, phenotype.entity_label, phenotype.quality_uid, phenotype.quality_label, phenotype.related_entity_uid, phenotype.related_entity_label, taxon.uid AS taxon_uid, taxon.label AS taxon_label, taxon.rank_uid, taxon.is_extinct, EXISTS (SELECT 1 FROM asserted_taxon_annotation WHERE asserted_taxon_annotation.annotation_id = taxon_annotation.annotation_id) AS is_asserted FROM taxon_annotation JOIN phenotype ON (phenotype.node_id = taxon_annotation.phenotype_node_id) JOIN taxon ON (taxon.node_id = taxon_annotation.taxon_node_id) ORDER BY annotation_id LIMIT 10000 OFFSET ?";
+    private static final String ANNOTATIONS_QUERY = "SELECT taxon_annotation.*, phenotype.uid AS phenotype_uid, phenotype.entity_uid, phenotype.entity_label, phenotype.quality_uid, phenotype.quality_label, phenotype.related_entity_uid, phenotype.related_entity_label, taxon.uid AS taxon_uid, taxon.label AS taxon_label, taxon.rank_uid, taxon.is_extinct, entity_label.simple_label AS direct_entity_simple_label, quality_label.simple_label AS direct_quality_simple_label, related_entity_label.simple_label AS direct_related_entity_simple_label, EXISTS (SELECT 1 FROM asserted_taxon_annotation WHERE asserted_taxon_annotation.annotation_id = taxon_annotation.annotation_id) AS is_asserted FROM taxon_annotation JOIN phenotype ON (phenotype.node_id = taxon_annotation.phenotype_node_id) JOIN taxon ON (taxon.node_id = taxon_annotation.taxon_node_id) JOIN smart_node_label entity_label ON (entity_label.node_id = phenotype.entity_node_id) JOIN smart_node_label quality_label ON (quality_label.node_id = phenotype.quality_node_id) LEFT JOIN smart_node_label related_entity_label ON (related_entity_label.node_id = phenotype.related_entity_node_id) ORDER BY annotation_id LIMIT 10000 OFFSET ?";
 
     private Connection connection;
     private SolrServer solr;
@@ -73,11 +73,11 @@ public class SolrPhenotypeAnnotationLoader {
         doc.addField("is_extinct", annotationsResult.getBoolean("is_extinct"));
         doc.addField("rank", annotationsResult.getString("rank_uid"));
         doc.addField("direct_entity", annotationsResult.getString("entity_uid"));
-        doc.addField("direct_entity_label", annotationsResult.getString("entity_label"));
+        doc.addField("direct_entity_label", annotationsResult.getString("direct_entity_simple_label"));
         doc.addField("direct_quality", annotationsResult.getString("quality_uid"));
-        doc.addField("direct_quality_label", annotationsResult.getString("quality_label"));
+        doc.addField("direct_quality_label", annotationsResult.getString("direct_quality_simple_label"));
         doc.addField("direct_related_entity", annotationsResult.getString("related_entity_uid"));
-        doc.addField("direct_related_entity_label", annotationsResult.getString("related_entity_label"));
+        doc.addField("direct_related_entity_label", annotationsResult.getString("direct_related_entity_simple_label"));
         return doc;
     }
     

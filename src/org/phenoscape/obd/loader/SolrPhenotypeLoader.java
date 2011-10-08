@@ -29,7 +29,7 @@ public class SolrPhenotypeLoader {
     public static final String DB_PASSWORD = "db-password";
     /** The solr-url system property should contain the url for the Solr web application. */
     public static final String SOLR_URL = "solr-url";
-    private static final String PHENOTYPES_QUERY = "SELECT * FROM phenotype";
+    private static final String PHENOTYPES_QUERY = "SELECT phenotype.*, entity_label.simple_label AS direct_entity_simple_label, quality_label.simple_label AS direct_quality_simple_label, related_entity_label.simple_label AS direct_related_entity_simple_label FROM phenotype JOIN smart_node_label entity_label ON (entity_label.node_id = phenotype.entity_node_id) JOIN smart_node_label quality_label ON (quality_label.node_id = phenotype.quality_node_id) LEFT JOIN smart_node_label related_entity_label ON (related_entity_label.node_id = phenotype.related_entity_node_id)";
     private static final String TAXA_QUERY = "SELECT DISTINCT taxon.node_id AS taxon_node_id, taxon.uid AS taxon_uid, EXISTS (SELECT 1 FROM asserted_taxon_annotation WHERE asserted_taxon_annotation.annotation_id = taxon_annotation.annotation_id) AS some_is_asserted FROM taxon_annotation JOIN link taxon_is_a ON (taxon_is_a.predicate_id = (SELECT node.node_id FROM node WHERE node.uid = 'OBO_REL:is_a') AND taxon_is_a.node_id = taxon_annotation.taxon_node_id) JOIN node taxon ON (taxon.node_id = taxon_is_a.object_id) WHERE taxon_annotation.phenotype_node_id = ?";
     private static final String ENTITIES_QUERY = "SELECT DISTINCT entity.node_id AS entity_node_id, entity.uid AS entity_uid, phenotype.node_id AS phenotype_node_id, EXISTS (SELECT 1 FROM link WHERE link.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in') AND link.node_id = phenotype.node_id AND link.object_id = phenotype_inheres_in_part_of.object_id) AS strict_inheres_in FROM phenotype JOIN link phenotype_inheres_in_part_of ON (phenotype_inheres_in_part_of.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:inheres_in_part_of') AND phenotype_inheres_in_part_of.node_id = phenotype.node_id) JOIN node entity ON (entity.node_id = phenotype_inheres_in_part_of.object_id) WHERE phenotype.node_id = ?";
     private static final String QUALITIES_QUERY = "SELECT DISTINCT quality.node_id AS quality_node_id, quality.uid AS quality_uid, phenotype.node_id AS phenotype_node_id FROM phenotype JOIN link phenotype_is_a ON (phenotype_is_a.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:is_a') AND phenotype_is_a.node_id = phenotype.node_id) JOIN node quality ON (quality.node_id = phenotype_is_a.object_id) WHERE phenotype.node_id = ?";
@@ -66,11 +66,11 @@ public class SolrPhenotypeLoader {
             doc.addField("id", phenotypeUID);
             doc.addField("type", "phenotype");
             doc.addField("direct_entity", phenotypesResult.getString("entity_uid"));
-            doc.addField("direct_entity_label", phenotypesResult.getString("entity_label"));
+            doc.addField("direct_entity_label", phenotypesResult.getString("direct_entity_simple_label"));
             doc.addField("direct_quality", phenotypesResult.getString("quality_uid"));
-            doc.addField("direct_quality_label", phenotypesResult.getString("quality_label"));
+            doc.addField("direct_quality_label", phenotypesResult.getString("direct_quality_simple_label"));
             doc.addField("direct_related_entity", phenotypesResult.getString("related_entity_uid"));
-            doc.addField("direct_related_entity_label", phenotypesResult.getString("related_entity_label"));
+            doc.addField("direct_related_entity_label", phenotypesResult.getString("direct_related_entity_simple_label"));
             this.solr.add(doc);
         }
         this.solr.commit();
