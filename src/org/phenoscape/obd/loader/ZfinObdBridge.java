@@ -58,11 +58,12 @@ public class ZfinObdBridge {
     public static final String MORPHOLINO_URL = "morpholino-url";
     /** The pheno-environment-url system property should contain the URL of the ZFIN pheno environment file. */
     public static final String PHENO_ENVIRONMENT_URL = "pheno-environment-url";
+    /** The wildtype-lines-url system property should contain the URL of the ZFIN wildtype lines file. */
+    public static final String WILDTYPE_LINES_URL = "wildtype-lines-url";
 
 
 
     private static final String MORPHOLINO = "morpholino";
-    private static final String WILD_TYPE = "wild type (unspecified)";
 
     private static final RelationVocabulary relationVocabulary = new RelationVocabulary();
 
@@ -76,6 +77,7 @@ public class ZfinObdBridge {
     private Map<String, String> morpholinoToGeneMap;
     private Map<String, String> genotypeToGeneMap;
     private Map<String, String> morpholinoIdToLabelMap;
+    private List<String> wildtypeLines;
 
     /*
      * This map has been created to keep track of main IDs and their mapping to alternate IDs
@@ -90,7 +92,7 @@ public class ZfinObdBridge {
         this.setOboSession(this.loadOBOSession());
 
         this.id2AlternateIdMap = createAltIdMappings(this.getOboSession());
-
+        this.wildtypeLines = new ArrayList<String>();
         this.zfinGeneIdToNameMap = new HashMap<String, String>();
         this.zfinGeneIdToSymbolMap = new HashMap<String, String>();
         this.envToMorpholinoMap = new HashMap<String, String>();
@@ -98,11 +100,23 @@ public class ZfinObdBridge {
         this.genotypeToGeneMap = new HashMap<String, String>();
         this.morpholinoIdToLabelMap = new HashMap<String, String>();
 
+        this.loadWildtypeLines();
         this.createZfinNameDirectory();
         this.mapEnvToMorpholino();
         this.mapMorpholinoToGene();
         this.mapGenotypeToGene();
         this.mapGenotypeToGeneViaMissingMarkers();
+    }
+
+    private void loadWildtypeLines() throws IOException {
+        final URL wildtypeLinesURL = new URL(System.getProperty(WILDTYPE_LINES_URL));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(wildtypeLinesURL.openStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            final String[] fields = line.split("\\t");
+            this.wildtypeLines.add(fields[0].trim());
+        }
+        reader.close();
     }
 
     public OBOSession getOboSession() {
@@ -371,13 +385,14 @@ public class ZfinObdBridge {
                 log().info("Skipping line because of inadequate number of tab delimited components: " + phenoFileLine);
                 continue;
             }
-            genotypeId = columns[0];
-            genotype = columns[1];
-            publicationID = columns[10];
-            environmentId = columns[11];
+            genotypeId = columns[0].trim();
+            genotype = columns[1].trim();
+            publicationID = columns[10].trim();
+            environmentId = columns[11].trim();
 
             final boolean isMorpholino;
-            if (genotype.equals(WILD_TYPE)) {
+            if (this.wildtypeLines.contains(genotypeId)) {
+                //FIXME this is a dangerous assumption
                 isMorpholino = true;
                 genotypeId = this.envToMorpholinoMap.get(environmentId);
                 genotype = this.morpholinoIdToLabelMap.get(genotypeId);
