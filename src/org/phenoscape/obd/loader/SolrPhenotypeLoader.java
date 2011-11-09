@@ -36,6 +36,7 @@ public class SolrPhenotypeLoader {
     private static final String RELATED_ENTITIES_QUERY = "SELECT DISTINCT related_entity.node_id AS related_entity_node_id, related_entity.uid AS related_entity_uid, phenotype.node_id AS phenotype_node_id FROM phenotype JOIN link phenotype_towards ON (phenotype_towards.predicate_id = (SELECT node.node_id FROM node where node.uid = 'OBO_REL:towards') AND phenotype_towards.node_id = phenotype.node_id) JOIN node related_entity ON (related_entity.node_id = phenotype_towards.object_id) WHERE phenotype.node_id = ?";
     private static final String GENES_QUERY = "SELECT DISTINCT gene_node_id, gene_uid FROM distinct_gene_annotation WHERE phenotype_node_id = ?";
     private static final String GO_QUERY = String.format("SELECT DISTINCT go_term.node_id AS go_term_node_id, go_term.uid AS go_term_uid FROM distinct_gene_annotation JOIN link go_link ON (go_link.node_id = distinct_gene_annotation.gene_node_id AND go_link.predicate_id IN (SELECT node_id FROM node WHERE uid IN ('%s', '%s', '%s'))) JOIN node go_term ON (go_term.node_id = go_link.object_id) WHERE phenotype_node_id = ?", Vocab.GENE_TO_BIOLOGICAL_PROCESS_REL_ID, Vocab.GENE_TO_CELLULAR_COMPONENT_REL_ID, Vocab.GENE_TO_MOLECULAR_FUNCTION_REL_ID);
+    private static final String PUBLICATIONS_QUERY = "SELECT DISTINCT publication.uid AS publication_uid FROM asserted_taxon_annotation JOIN annotation_source ON (annotation_source.annotation_id = asserted_taxon_annotation.annotation_id) JOIN node publication ON (publication.node_id = annotation_source.publication_node_id) WHERE asserted_taxon_annotation.phenotype_node_id = ?";
     private Connection connection;
     private SolrServer solr;
     private PreparedStatement taxaQuery;
@@ -44,6 +45,7 @@ public class SolrPhenotypeLoader {
     private PreparedStatement relatedEntitiesQuery;
     private PreparedStatement genesQuery;
     private PreparedStatement goQuery;
+    private PreparedStatement publicationsQuery;
 
     public void loadPhenotypeAssociationsIntoSolr() throws SQLException, ClassNotFoundException, IOException, ParserConfigurationException, SAXException, SolrServerException {
         this.connection = this.getConnection();
@@ -55,6 +57,7 @@ public class SolrPhenotypeLoader {
         this.relatedEntitiesQuery = this.connection.prepareStatement(RELATED_ENTITIES_QUERY);
         this.genesQuery = this.connection.prepareStatement(GENES_QUERY);
         this.goQuery = this.connection.prepareStatement(GO_QUERY);
+        this.publicationsQuery = this.connection.prepareStatement(PUBLICATIONS_QUERY);
         final ResultSet phenotypesResult = phenotypesQuery.executeQuery();
         int counter = 0;
         while (phenotypesResult.next()) {
@@ -83,6 +86,7 @@ public class SolrPhenotypeLoader {
         this.addQualitiesToPhenotype(phenotypeNodeID, doc);
         this.addRelatedEntitiesToPhenotype(phenotypeNodeID, doc);
         this.addGenesToPhenotype(phenotypeNodeID, doc);
+        this.addPublicationsToPhenotype(phenotypeNodeID, doc);
         return doc;
     }
 
@@ -142,6 +146,15 @@ public class SolrPhenotypeLoader {
         while (goResult.next()) {
             final String goTermUID = goResult.getString("go_term_uid");
             doc.addField("gene", goTermUID);
+        }
+    }
+    
+    private void addPublicationsToPhenotype(int phenotypeNodeID, SolrInputDocument doc) throws SQLException {
+        this.publicationsQuery.setInt(1, phenotypeNodeID);
+        final ResultSet pubsResult = this.publicationsQuery.executeQuery();
+        while (pubsResult.next()) {
+            final String pubUID = pubsResult.getString("publication_uid");
+            doc.addField("publication", pubUID);
         }
     }
 
