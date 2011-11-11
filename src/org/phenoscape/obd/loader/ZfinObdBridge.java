@@ -114,7 +114,7 @@ public class ZfinObdBridge {
         String line;
         while ((line = reader.readLine()) != null) {
             final String[] fields = line.split("\\t");
-            this.wildtypeLines.add(fields[0].trim());
+            this.wildtypeLines.add(this.normalizetoZfin(fields[0].trim()));
         }
         reader.close();
     }
@@ -451,6 +451,13 @@ public class ZfinObdBridge {
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException, MalformedURLException, IOException {
+//        Logger.getRootLogger().setLevel(Level.ALL);
+//        final Properties properties = new Properties();
+//        properties.load(ZfinObdBridge.class.getResourceAsStream("connection.properties"));
+//        for (Entry<Object, Object> entry : properties.entrySet()) {
+//            System.setProperty(entry.getKey().toString(), entry.getValue().toString());
+//        }
+
         ZfinObdBridge zob = new ZfinObdBridge();
         zob.loadZfinData();
     }
