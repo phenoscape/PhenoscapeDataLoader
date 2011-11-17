@@ -1,5 +1,12 @@
 package org.phenoscape.obd.loader;
 
-public class TestObsoleteTerms {
+import org.junit.Test;
+
+public class TestObsoleteTerms extends OBDSQLTest {
+    
+    @Test
+    public void checkObsoleteClassesInAnnotations() {
+        
+    }
 
 }
