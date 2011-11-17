@@ -28,13 +28,13 @@
 	
 <!-- The compile target runs javac on all the java files, and saves them into  the classfiles directory  -->
 	<target name="compile" depends="init">
-		<javac srcdir="${src}" destdir="${classfiles}" debug="yes" source="${java-minimum}" target="${java-minimum}">
+		<javac includeantruntime="false" srcdir="${src}" destdir="${classfiles}" debug="yes" source="${java-minimum}" target="${java-minimum}">
 			<classpath refid="project.classpath"/>
 		</javac>
 	</target>
 	
     <target name="build-test" depends="compile">
-        <javac srcdir="${test}" destdir="${classfiles}" debug="yes" source="${java-minimum}" target="${java-minimum}">
+        <javac includeantruntime="false" srcdir="${test}" destdir="${classfiles}" debug="yes" source="${java-minimum}" target="${java-minimum}">
             <classpath refid="project.classpath"/>
         </javac>
     </target>
