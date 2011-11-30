@@ -7,7 +7,10 @@ import java.sql.SQLException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import org.jdom.transform.XSLTransformException;
 import org.obd.model.Graph;
 import org.obd.query.impl.OBDSQLShard;
 import org.w3c.dom.Document;
@@ -26,7 +29,7 @@ public class PublicationLoader {
     /** The ontology-dir system property should contain the path to a folder with ontologies to be loaded. */
     public static final String PUBLICATION_DIR = "publication-dir";    
 	
-	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException, SQLException, ClassNotFoundException {
+	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException, SQLException, ClassNotFoundException, XSLTransformException, TransformerFactoryConfigurationError, TransformerException {
 	    final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
         final Document xmlDoc = docBuilder.parse(new File(System.getProperty(PUBLICATION_DIR)));
