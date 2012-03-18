@@ -62,6 +62,10 @@ public class SolrTaxonLoader {
             if (rankUID != null) {
                 doc.addField("rank", rankUID);
             }
+            final String rankLabel = taxaResult.getString("rank_label");
+            if (rankLabel != null) {
+            	doc.addField("rank_label", rankLabel);
+            }
             final boolean isExtinct = taxaResult.getBoolean("is_extinct");
             doc.addField("is_extinct", isExtinct);
             final String orderUID = taxaResult.getString("order_uid");
