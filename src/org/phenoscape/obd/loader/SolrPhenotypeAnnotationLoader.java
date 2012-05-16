@@ -44,8 +44,8 @@ public class SolrPhenotypeAnnotationLoader {
         int counter = 0;
         while (more) {
             int iterationCounter = 0;
-            offset += 10000;
             annotationsQuery.setInt(1, offset);
+            offset += 10000;
             final ResultSet annotationsResult = annotationsQuery.executeQuery();
             while (annotationsResult.next()) {
                 iterationCounter++;
