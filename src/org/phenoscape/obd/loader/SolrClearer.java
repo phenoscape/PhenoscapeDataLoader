@@ -19,6 +19,7 @@ public class SolrClearer {
     public void clearSolrIndex() throws SolrServerException, IOException {
         this.solr = this.getSolrServer();
         this.solr.deleteByQuery("*:*");
+        this.solr.commit();
     }
 
     public static void main(String[] args) throws SolrServerException, IOException {
